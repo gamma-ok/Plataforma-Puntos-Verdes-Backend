@@ -49,6 +49,23 @@ public class Usuario implements UserDetails {
 	public Usuario() {
 	}
 
+	public Usuario(Long id, String username, String password, String nombre, String apellido, String email,
+			String celular, boolean enabled, String perfil, int puntosAcumulados, LocalDateTime fechaRegistro,
+			Set<UsuarioRol> usuarioRoles) {
+		this.id = id;
+		this.username = username;
+		this.password = password;
+		this.nombre = nombre;
+		this.apellido = apellido;
+		this.email = email;
+		this.celular = celular;
+		this.enabled = enabled;
+		this.perfil = perfil;
+		this.puntosAcumulados = puntosAcumulados;
+		this.fechaRegistro = fechaRegistro;
+		this.usuarioRoles = usuarioRoles;
+	}
+
 	// Métodos UserDetails
 	@Override
 	@JsonIgnore
