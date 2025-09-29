@@ -24,7 +24,6 @@ public class UsuarioController {
     @PostMapping("/registrar")
     public ResponseEntity<Usuario> registrarUsuario(@RequestBody Usuario usuario) throws Exception {
         usuario.setPerfil("default.png"); // foto por defecto
-        usuario.setPassword(this.bCryptPasswordEncoder.encode(usuario.getPassword()));
         return ResponseEntity.ok(usuarioService.guardarUsuario(usuario));
     }
 

@@ -1,6 +1,7 @@
 package pe.com.puntosverdes.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pe.com.puntosverdes.model.Rol;
 import pe.com.puntosverdes.model.Usuario;
@@ -15,57 +16,62 @@ import java.util.List;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private RolRepository rolRepository;
+	@Autowired
+	private RolRepository rolRepository;
 
-    @Override
-    public Usuario guardarUsuario(Usuario usuario) {
-        // Verificar si ya existe el username
-        Usuario usuarioExistente = usuarioRepository.findByUsername(usuario.getUsername());
-        if (usuarioExistente != null) {
-            throw new RuntimeException("El usuario con username " + usuario.getUsername() + " ya existe.");
-        }
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-        // Buscar rol "CIUDADANO"
-        Rol rolCiudadano = rolRepository.findByRolNombre("CIUDADANO");
-        if (rolCiudadano == null) {
-            // Si no existe el rol en la BD, lo creamos
-            rolCiudadano = new Rol();
-            rolCiudadano.setRolNombre("CIUDADANO");
-            rolRepository.save(rolCiudadano);
-        }
+	@Override
+	public Usuario guardarUsuario(Usuario usuario) {
+		// Verificar si ya existe el username
+		Usuario usuarioExistente = usuarioRepository.findByUsername(usuario.getUsername());
+		if (usuarioExistente != null) {
+			throw new RuntimeException("El usuario con username " + usuario.getUsername() + " ya existe.");
+		}
 
-        // Crear relación UsuarioRol
-        UsuarioRol usuarioRol = new UsuarioRol(usuario, rolCiudadano);
+		// Encriptar contraseña antes de guardar
+		usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
-        if (usuario.getUsuarioRoles() == null) {
-            usuario.setUsuarioRoles(new HashSet<>());
-        }
-        usuario.getUsuarioRoles().add(usuarioRol);
+		// Buscar rol "CIUDADANO"
+		Rol rolCiudadano = rolRepository.findByRolNombre("CIUDADANO");
+		if (rolCiudadano == null) {
+			rolCiudadano = new Rol();
+			rolCiudadano.setRolNombre("CIUDADANO");
+			rolRepository.save(rolCiudadano);
+		}
 
-        return usuarioRepository.save(usuario);
-    }
+		// Crear relación UsuarioRol
+		UsuarioRol usuarioRol = new UsuarioRol(usuario, rolCiudadano);
 
-    @Override
-    public Usuario obtenerUsuarioPorId(Long id) {
-        return usuarioRepository.findById(id).orElse(null);
-    }
+		if (usuario.getUsuarioRoles() == null) {
+			usuario.setUsuarioRoles(new HashSet<>());
+		}
+		usuario.getUsuarioRoles().add(usuarioRol);
 
-    @Override
-    public Usuario obtenerUsuarioPorUsername(String username) {
-        return usuarioRepository.findByUsername(username);
-    }
+		return usuarioRepository.save(usuario);
+	}
 
-    @Override
-    public List<Usuario> listarUsuarios() {
-        return usuarioRepository.findAll();
-    }
+	@Override
+	public Usuario obtenerUsuarioPorId(Long id) {
+		return usuarioRepository.findById(id).orElse(null);
+	}
 
-    @Override
-    public void eliminarUsuario(Long id) {
-        usuarioRepository.deleteById(id);
-    }
+	@Override
+	public Usuario obtenerUsuarioPorUsername(String username) {
+		return usuarioRepository.findByUsername(username);
+	}
+
+	@Override
+	public List<Usuario> listarUsuarios() {
+		return usuarioRepository.findAll();
+	}
+
+	@Override
+	public void eliminarUsuario(Long id) {
+		usuarioRepository.deleteById(id);
+	}
 }

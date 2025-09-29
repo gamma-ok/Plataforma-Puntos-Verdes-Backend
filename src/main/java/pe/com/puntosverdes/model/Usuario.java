@@ -1,6 +1,7 @@
 package pe.com.puntosverdes.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.persistence.*;
@@ -20,9 +21,11 @@ public class Usuario implements UserDetails {
 	private Long id;
 
 	@Column(unique = true, nullable = false)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String username;
 
 	@Column(nullable = false)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 
 	private String nombre;
@@ -78,13 +81,11 @@ public class Usuario implements UserDetails {
 	}
 
 	@Override
-	@JsonIgnore
 	public String getPassword() {
 		return this.password;
 	}
 
 	@Override
-	@JsonIgnore
 	public String getUsername() {
 		return this.username;
 	}
