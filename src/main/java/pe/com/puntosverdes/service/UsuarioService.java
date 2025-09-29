@@ -11,13 +11,10 @@ public interface UsuarioService {
     Usuario obtenerUsuarioPorUsername(String username);
     List<Usuario> listarUsuarios();
     void eliminarUsuario(Long id);
-
-    void eliminarUsuarioPorUsername(String username);
     Usuario actualizarUsuario(Long id, Usuario usuarioActualizado);
     Usuario cambiarContrasena(Long id, String nuevaContrasena);
     Usuario habilitarUsuario(Long id);
     Usuario deshabilitarUsuario(Long id);
-    List<Usuario> listarUsuariosPorRol(String rolNombre);
-    
+    List<Usuario> listarUsuariosPorRol(String rolNombre); 
     Usuario actualizarPerfil(Long id, String perfilUrl);
 }

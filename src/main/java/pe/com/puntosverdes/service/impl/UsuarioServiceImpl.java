@@ -72,11 +72,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public void eliminarUsuarioPorUsername(String username) {
-        usuarioRepository.deleteByUsername(username);
-    }
-
-    @Override
     public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
         return usuarioRepository.findById(id).map(usuario -> {
             usuario.setNombre(usuarioActualizado.getNombre());

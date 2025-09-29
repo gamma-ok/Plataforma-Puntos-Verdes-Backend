@@ -3,9 +3,9 @@ package pe.com.puntosverdes.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pe.com.puntosverdes.dto.CambioPasswordDTO;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.UsuarioService;
-
 import java.util.List;
 
 @RestController
@@ -52,8 +52,8 @@ public class UsuarioController {
 
     // Cambiar contraseña
     @PutMapping("/{id}/cambiar-password")
-    public ResponseEntity<Usuario> cambiarContrasena(@PathVariable Long id, @RequestBody String nuevaContrasena) {
-        Usuario actualizado = usuarioService.cambiarContrasena(id, nuevaContrasena);
+    public ResponseEntity<Usuario> cambiarContrasena(@PathVariable Long id, @RequestBody CambioPasswordDTO request) {
+        Usuario actualizado = usuarioService.cambiarContrasena(id, request.getNuevaContrasena());
         return actualizado != null ? ResponseEntity.ok(actualizado) : ResponseEntity.notFound().build();
     }
 
@@ -78,19 +78,13 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    // Eliminar por username
-    @DeleteMapping("/username/{username}")
-    public ResponseEntity<Void> eliminarUsuarioPorUsername(@PathVariable String username) {
-        usuarioService.eliminarUsuarioPorUsername(username);
-        return ResponseEntity.noContent().build();
-    }
-
     // Listar usuarios por rol
     @GetMapping("/rol/{rolNombre}")
     public ResponseEntity<List<Usuario>> listarUsuariosPorRol(@PathVariable String rolNombre) {
         return ResponseEntity.ok(usuarioService.listarUsuariosPorRol(rolNombre));
     }
     
+    // Actualizar perfil
     @PutMapping("/{id}/perfil")
     public ResponseEntity<Usuario> actualizarPerfil(
             @PathVariable Long id,
