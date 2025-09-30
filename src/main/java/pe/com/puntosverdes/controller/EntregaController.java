@@ -2,10 +2,13 @@ package pe.com.puntosverdes.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import pe.com.puntosverdes.dto.EntregaValidacionDTO;
 import pe.com.puntosverdes.model.Entrega;
+import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.EntregaService;
-
+import pe.com.puntosverdes.service.UsuarioService;
 import java.util.List;
 
 @RestController
@@ -15,6 +18,9 @@ public class EntregaController {
 
     @Autowired
     private EntregaService entregaService;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     @PostMapping("/")
     public ResponseEntity<Entrega> registrarEntrega(@RequestBody Entrega entrega) {
@@ -34,5 +40,22 @@ public class EntregaController {
     @GetMapping("/recolector/{recolectorId}")
     public ResponseEntity<List<Entrega>> listarPorRecolector(@PathVariable Long recolectorId) {
         return ResponseEntity.ok(entregaService.listarEntregasPorRecolector(recolectorId));
+    }
+
+    @PutMapping("/{id}/validar")
+    public ResponseEntity<Entrega> validarEntrega(
+            @PathVariable Long id,
+            @RequestBody EntregaValidacionDTO dto,
+            Authentication authentication) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
+        Entrega entrega = entregaService.validarEntrega(
+                id,
+                dto.isValidada(),
+                dto.getPuntosGanados(),
+                dto.getRespuestaAdmin(),
+                dto.getObservaciones(),
+                usuario.getId() // recolector/admin que valida
+        );
+        return ResponseEntity.ok(entrega);
     }
 }

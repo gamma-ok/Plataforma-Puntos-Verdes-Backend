@@ -8,8 +8,8 @@ import java.util.List;
 
 @Repository
 public interface EntregaRepository extends JpaRepository<Entrega, Long> {
-
-	List<Entrega> findByCiudadanoId(Long ciudadanoId);
-	List<Entrega> findByRecolectorId(Long recolectorId);
-	List<Entrega> findByValidadaTrue();
+	
+    List<Entrega> findByCiudadanoId(Long ciudadanoId);
+    List<Entrega> findByRecolectorId(Long recolectorId);
+    List<Entrega> findByValidadaTrue();
 }

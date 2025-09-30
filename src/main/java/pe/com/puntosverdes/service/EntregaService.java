@@ -10,4 +10,5 @@ public interface EntregaService {
     List<Entrega> listarEntregas();
     List<Entrega> listarEntregasPorCiudadano(Long ciudadanoId);
     List<Entrega> listarEntregasPorRecolector(Long recolectorId);
+    Entrega validarEntrega(Long entregaId, boolean validada, int puntosGanados, String respuestaAdmin, String observaciones, Long recolectorId);
 }
