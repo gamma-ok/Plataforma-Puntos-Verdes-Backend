@@ -54,8 +54,21 @@ public class UsuarioController {
         return usuario != null ? ResponseEntity.ok(usuarioService.convertirADTO(usuario))
                 : ResponseEntity.notFound().build();
     }
+    
+    // Buscar por email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Usuario> obtenerUsuarioPorEmail(@PathVariable String email) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
+        return ResponseEntity.ok(usuario);
+    }
 
-    // Actualizar usuario (admin)
+    // Buscar por celular
+    @GetMapping("/celular/{celular}")
+    public ResponseEntity<List<Usuario>> obtenerUsuariosPorCelular(@PathVariable String celular) {
+        return ResponseEntity.ok(usuarioService.obtenerUsuariosPorCelular(celular));
+    }
+
+    // Actualizar usuario (ADMIN)
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
         Usuario actualizado = usuarioService.actualizarUsuario(id, usuario);
@@ -179,5 +192,12 @@ public class UsuarioController {
         );
 
         return ResponseEntity.ok(dto);
+    }
+    
+    // Asignar rol (solo ADMIN debería acceder a este endpoint)
+    @PutMapping("/{id}/asignar-rol")
+    public ResponseEntity<Usuario> asignarRol(@PathVariable Long id, @RequestParam("rol") String rol) {
+        Usuario usuario = usuarioService.asignarRol(id, rol);
+        return ResponseEntity.ok(usuario);
     }
 }

@@ -66,6 +66,17 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (usuario == null) throw new UsuarioNotFoundException("Usuario no encontrado con username: " + username);
         return usuario;
     }
+    
+    @Override
+    public Usuario obtenerUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con email: " + email));
+    }
+
+    @Override
+    public List<Usuario> obtenerUsuariosPorCelular(String celular) {
+        return usuarioRepository.findByCelular(celular);
+    }
 
     @Override
     public List<Usuario> listarUsuarios() {
@@ -144,5 +155,24 @@ public class UsuarioServiceImpl implements UsuarioService {
                 usuario.isEnabled(),
                 roles
         );
+    }
+    
+    @Override
+    public Usuario asignarRol(Long idUsuario, String nuevoRol) {
+        return usuarioRepository.findById(idUsuario).map(usuario -> {
+            Rol rol = rolRepository.findByRolNombre(nuevoRol.toUpperCase());
+            if (rol == null) {
+                rol = new Rol();
+                rol.setRolNombre(nuevoRol.toUpperCase());
+                rolRepository.save(rol);
+            }
+
+            // limpiar roles actuales y asignar el nuevo
+            usuario.getUsuarioRoles().clear();
+            UsuarioRol usuarioRol = new UsuarioRol(usuario, rol);
+            usuario.getUsuarioRoles().add(usuarioRol);
+
+            return usuarioRepository.save(usuario);
+        }).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + idUsuario));
     }
 }

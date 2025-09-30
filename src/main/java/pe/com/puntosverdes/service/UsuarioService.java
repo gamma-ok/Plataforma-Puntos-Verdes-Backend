@@ -13,6 +13,8 @@ public interface UsuarioService {
     // Obtener usuario
     Usuario obtenerUsuarioPorId(Long id);
     Usuario obtenerUsuarioPorUsername(String username);
+    Usuario obtenerUsuarioPorEmail(String email);
+    List<Usuario> obtenerUsuariosPorCelular(String celular);
 
     // Listar usuarios
     List<Usuario> listarUsuarios();
@@ -32,4 +34,7 @@ public interface UsuarioService {
 
     // Conversión a DTO (para evitar exponer password)
     UsuarioDTO convertirADTO(Usuario usuario);
+    
+    // Asignar rol (solo ADMIN debería poner)
+    Usuario asignarRol(Long idUsuario, String nuevoRol);
 }

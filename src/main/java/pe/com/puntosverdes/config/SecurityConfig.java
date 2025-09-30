@@ -54,7 +54,14 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/auth/**", "/usuarios/**").permitAll()
+                    // Públicos
+                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/api/usuarios/registrar").permitAll()
+
+                    // Solo ADMIN puede asignar roles
+                    .requestMatchers("/api/usuarios/*/asignar-rol").hasRole("ADMIN")
+
+                    // El resto de usuarios deben estar autenticados
                     .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
