@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import pe.com.puntosverdes.dto.EntregaHistorialDTO;
 import pe.com.puntosverdes.dto.EntregaValidacionDTO;
+import pe.com.puntosverdes.dto.EntregaValidadaDTO;
 import pe.com.puntosverdes.dto.UltimaEntregaDTO;
 import pe.com.puntosverdes.model.Entrega;
 import pe.com.puntosverdes.model.Usuario;
@@ -46,12 +48,12 @@ public class EntregaController {
     }
 
     @PutMapping("/{id}/validar")
-    public ResponseEntity<Entrega> validarEntrega(
+    public ResponseEntity<EntregaValidadaDTO> validarEntrega(
             @PathVariable Long id,
             @RequestBody EntregaValidacionDTO dto,
             Authentication authentication) {
         Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
-        Entrega entrega = entregaService.validarEntrega(
+        EntregaValidadaDTO entrega = entregaService.validarEntrega(
                 id,
                 dto.isValidada(),
                 dto.getPuntosGanados(),

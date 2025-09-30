@@ -3,6 +3,7 @@ package pe.com.puntosverdes.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pe.com.puntosverdes.dto.EntregaHistorialDTO;
+import pe.com.puntosverdes.dto.EntregaValidadaDTO;
 import pe.com.puntosverdes.dto.UltimaEntregaDTO;
 import pe.com.puntosverdes.exception.EntregaNotFoundException;
 import pe.com.puntosverdes.model.Entrega;
@@ -10,7 +11,6 @@ import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.repository.EntregaRepository;
 import pe.com.puntosverdes.repository.UsuarioRepository;
 import pe.com.puntosverdes.service.EntregaService;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,28 +44,44 @@ public class EntregaServiceImpl implements EntregaService {
     }
 
     @Override
-    public Entrega validarEntrega(Long entregaId, boolean validada, int puntosGanados, String respuestaAdmin, String observaciones, Long recolectorId) {
-        return entregaRepository.findById(entregaId).map(entrega -> {
-            entrega.setValidada(validada);
-            entrega.setFechaValidacion(java.time.LocalDateTime.now());
-            entrega.setPuntosGanados(puntosGanados);
-            entrega.setRespuestaAdmin(respuestaAdmin);
-            entrega.setObservaciones(observaciones);
+    public EntregaValidadaDTO validarEntrega(Long entregaId, boolean validada, int puntosGanados,
+                                             String respuestaAdmin, String observaciones, Long recolectorId) {
+        Entrega entrega = entregaRepository.findById(entregaId)
+                .orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
 
-            if (recolectorId != null) {
-                Usuario recolector = usuarioRepository.findById(recolectorId)
-                        .orElseThrow(() -> new EntregaNotFoundException("Recolector no encontrado"));
-                entrega.setRecolector(recolector);
-            }
+        entrega.setValidada(validada);
+        entrega.setFechaValidacion(java.time.LocalDateTime.now());
+        entrega.setPuntosGanados(puntosGanados);
+        entrega.setRespuestaAdmin(respuestaAdmin);
+        entrega.setObservaciones(observaciones);
 
-            if (validada && puntosGanados > 0) {
-                Usuario ciudadano = entrega.getCiudadano();
-                ciudadano.setPuntosAcumulados(ciudadano.getPuntosAcumulados() + puntosGanados);
-                usuarioRepository.save(ciudadano);
-            }
+        if (recolectorId != null) {
+            Usuario recolector = usuarioRepository.findById(recolectorId)
+                    .orElseThrow(() -> new EntregaNotFoundException("Recolector no encontrado"));
+            entrega.setRecolector(recolector);
+        }
 
-            return entregaRepository.save(entrega);
-        }).orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
+        if (validada && puntosGanados > 0) {
+            Usuario ciudadano = entrega.getCiudadano();
+            ciudadano.setPuntosAcumulados(ciudadano.getPuntosAcumulados() + puntosGanados);
+            usuarioRepository.save(ciudadano);
+        }
+
+        Entrega actualizada = entregaRepository.save(entrega);
+
+        // Convertimos a DTO
+        return new EntregaValidadaDTO(
+                actualizada.getId(),
+                actualizada.getMaterial(),
+                actualizada.getCantidad(),
+                actualizada.getPuntosGanados(),
+                actualizada.isValidada(),
+                actualizada.getRespuestaAdmin(),
+                actualizada.getObservaciones(),
+                actualizada.getFechaValidacion(),
+                actualizada.getCiudadano() != null ? actualizada.getCiudadano().getUsername() : null,
+                actualizada.getPuntoVerde() != null ? actualizada.getPuntoVerde().getDireccion() : null
+        );
     }
 
     @Override
