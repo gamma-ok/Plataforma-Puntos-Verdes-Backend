@@ -45,7 +45,7 @@ public class Usuario implements UserDetails {
 	private LocalDateTime fechaRegistro = LocalDateTime.now();
 
 	// Relación con UsuarioRol
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "usuario")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "usuario", orphanRemoval = true)
 	@JsonIgnore
 	private Set<UsuarioRol> usuarioRoles = new HashSet<>();
 

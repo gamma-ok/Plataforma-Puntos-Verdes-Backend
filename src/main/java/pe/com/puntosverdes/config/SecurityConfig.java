@@ -59,7 +59,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/usuarios/registrar").permitAll()
 
                     // Solo ADMIN puede asignar roles
-                    .requestMatchers("/api/usuarios/*/asignar-rol").hasRole("ADMIN")
+                    .requestMatchers("/api/usuarios/{id}/asignar-rol").hasAuthority("ADMIN")
 
                     // El resto de usuarios deben estar autenticados
                     .anyRequest().authenticated()

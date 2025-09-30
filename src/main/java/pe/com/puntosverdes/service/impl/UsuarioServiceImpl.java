@@ -172,8 +172,10 @@ public class UsuarioServiceImpl implements UsuarioService {
                 rolRepository.save(rol);
             }
 
-            // limpiar roles actuales y asignar el nuevo
+            // 🔥 limpiar roles actuales
             usuario.getUsuarioRoles().clear();
+
+            // asignar solo el nuevo rol
             UsuarioRol usuarioRol = new UsuarioRol(usuario, rol);
             usuario.getUsuarioRoles().add(usuarioRol);
 
