@@ -4,11 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import pe.com.puntosverdes.dto.EntregaHistorialDTO;
 import pe.com.puntosverdes.dto.EntregaValidacionDTO;
+import pe.com.puntosverdes.dto.UltimaEntregaDTO;
 import pe.com.puntosverdes.model.Entrega;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.EntregaService;
 import pe.com.puntosverdes.service.UsuarioService;
+
 import java.util.List;
 
 @RestController
@@ -54,8 +57,18 @@ public class EntregaController {
                 dto.getPuntosGanados(),
                 dto.getRespuestaAdmin(),
                 dto.getObservaciones(),
-                usuario.getId() // recolector/admin que valida
+                usuario.getId()
         );
         return ResponseEntity.ok(entrega);
+    }
+
+    @GetMapping("/ciudadano/{ciudadanoId}/ultima")
+    public ResponseEntity<UltimaEntregaDTO> ultimaEntrega(@PathVariable Long ciudadanoId) {
+        return ResponseEntity.ok(entregaService.obtenerUltimaEntregaPorCiudadano(ciudadanoId));
+    }
+
+    @GetMapping("/ciudadano/{ciudadanoId}/historial")
+    public ResponseEntity<List<EntregaHistorialDTO>> historial(@PathVariable Long ciudadanoId) {
+        return ResponseEntity.ok(entregaService.listarHistorialPorCiudadano(ciudadanoId));
     }
 }
