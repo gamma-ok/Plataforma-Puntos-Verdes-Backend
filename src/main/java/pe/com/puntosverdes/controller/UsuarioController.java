@@ -39,6 +39,11 @@ public class UsuarioController {
         );
     }
 
+    @GetMapping("/ranking")
+    public ResponseEntity<List<Usuario>> obtenerRanking() {
+        return ResponseEntity.ok(usuarioService.obtenerRankingUsuarios());
+    }
+    
     // Obtener por ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> obtenerUsuario(@PathVariable Long id) {

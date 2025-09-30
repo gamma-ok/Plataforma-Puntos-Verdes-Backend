@@ -19,6 +19,7 @@ public interface UsuarioService {
     // Listar usuarios
     List<Usuario> listarUsuarios();
     List<Usuario> listarUsuariosPorRol(String rolNombre);
+    List<Usuario> obtenerRankingUsuarios();
 
     // Eliminar usuario
     void eliminarUsuario(Long id);

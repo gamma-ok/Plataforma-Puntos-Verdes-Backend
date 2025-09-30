@@ -84,6 +84,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    public List<Usuario> obtenerRankingUsuarios() {
+        return usuarioRepository.findAllByOrderByPuntosAcumuladosDesc();
+    }
+    
+    @Override
     public void eliminarUsuario(Long id) {
         if (!usuarioRepository.existsById(id)) {
             throw new UsuarioNotFoundException("Usuario no encontrado con id: " + id);
