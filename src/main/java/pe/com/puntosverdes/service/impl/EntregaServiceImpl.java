@@ -11,6 +11,8 @@ import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.repository.EntregaRepository;
 import pe.com.puntosverdes.repository.UsuarioRepository;
 import pe.com.puntosverdes.service.EntregaService;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,5 +116,16 @@ public class EntregaServiceImpl implements EntregaService {
                 entrega.getPuntosGanados(),
                 ubicacion
         );
+    }
+    
+    @Override
+    public Entrega subirEvidencias(Long entregaId, List<String> rutasEvidencias) {
+        return entregaRepository.findById(entregaId).map(entrega -> {
+            if (entrega.getEvidencias() == null) {
+                entrega.setEvidencias(new ArrayList<>());
+            }
+            entrega.getEvidencias().addAll(rutasEvidencias);
+            return entregaRepository.save(entrega);
+        }).orElseThrow(() -> new RuntimeException("Entrega no encontrada con id: " + entregaId));
     }
 }

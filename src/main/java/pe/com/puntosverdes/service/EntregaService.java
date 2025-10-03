@@ -18,4 +18,6 @@ public interface EntregaService {
     
     UltimaEntregaDTO obtenerUltimaEntregaPorCiudadano(Long ciudadanoId);
     List<EntregaHistorialDTO> listarHistorialPorCiudadano(Long ciudadanoId);
+    
+    Entrega subirEvidencias(Long entregaId, List<String> rutasEvidencias);
 }
