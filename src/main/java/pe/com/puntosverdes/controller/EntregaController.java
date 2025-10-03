@@ -2,6 +2,10 @@ package pe.com.puntosverdes.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +22,9 @@ import pe.com.puntosverdes.service.EntregaService;
 import pe.com.puntosverdes.service.UsuarioService;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -84,7 +91,7 @@ public class EntregaController {
         return ResponseEntity.ok(entregaService.listarHistorialPorCiudadano(ciudadanoId));
     }
     
-    // 📌 Nuevo endpoint con DTO
+    // Subir evidencias
     @PostMapping("/{id}/evidencias")
     public ResponseEntity<EntregaEvidenciaDTO> subirEvidencias(
             @PathVariable Long id,
@@ -102,7 +109,7 @@ public class EntregaController {
                 String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 String filePath = uploadDir + fileName;
                 file.transferTo(new File(filePath));
-                rutasGuardadas.add(filePath);
+                rutasGuardadas.add(fileName); // 🔥 Guardamos solo el nombre, no la ruta completa
             }
 
             Entrega entregaActualizada = entregaService.subirEvidencias(id, rutasGuardadas);
@@ -112,6 +119,26 @@ public class EntregaController {
             );
 
         } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    // Servir evidencias como imágenes
+    @GetMapping("/evidencias/{fileName:.+}")
+    public ResponseEntity<Resource> verEvidencia(@PathVariable String fileName) {
+        try {
+            Path filePath = Paths.get(uploadDir).resolve(fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG) // por defecto, puedes detectar tipo real
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException e) {
             return ResponseEntity.status(500).build();
         }
     }
