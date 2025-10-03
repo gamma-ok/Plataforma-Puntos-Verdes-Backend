@@ -11,117 +11,77 @@ import java.util.Set;
 @Table(name = "campanias")
 public class Campania {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	private String titulo;
+    private String titulo;
 
-	@Column(length = 2000)
-	private String descripcion;
+    @Column(length = 2000)
+    private String descripcion;
 
-	private LocalDateTime fechaInicio;
-	private LocalDateTime fechaFin;
+    private LocalDateTime fechaInicio;
+    private LocalDateTime fechaFin;
 
-	private String ubicacion; // lugar de la campaña
+    private String ubicacion; // lugar de la campaña
 
-	private boolean activa = true;
+    private boolean activa = true;
 
-	// Usuario que la creó (ADMIN o MUNICIPALIDAD)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "creado_por_id")
-	@JsonIgnoreProperties({ "usuarioRoles" })
-	private Usuario creadoPor;
+    private int puntosExtra = 0; // puntos adicionales por participar
 
-	// Entregas asociadas a esta campaña
-	@OneToMany(mappedBy = "campania", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnoreProperties({ "campania" })
-	private Set<Entrega> entregas = new HashSet<>();
+    // Usuario que la creó (ADMIN o MUNICIPALIDAD)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creado_por_id")
+    @JsonIgnoreProperties({ "usuarioRoles" })
+    private Usuario creadoPor;
 
-	public Campania() {
-	}
+    // Entregas asociadas a esta campaña
+    @OneToMany(mappedBy = "campania", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({ "campania" })
+    private Set<Entrega> entregas = new HashSet<>();
 
-	public Campania(String titulo, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin,
-			String ubicacion, Usuario creadoPor) {
-		this.titulo = titulo;
-		this.descripcion = descripcion;
-		this.fechaInicio = fechaInicio;
-		this.fechaFin = fechaFin;
-		this.ubicacion = ubicacion;
-		this.creadoPor = creadoPor;
-		this.activa = true;
-	}
+    public Campania() {}
 
-	// Getters & Setters
-	public Long getId() {
-		return id;
-	}
+    public Campania(String titulo, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin,
+                    String ubicacion, int puntosExtra, Usuario creadoPor) {
+        this.titulo = titulo;
+        this.descripcion = descripcion;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+        this.ubicacion = ubicacion;
+        this.puntosExtra = puntosExtra;
+        this.creadoPor = creadoPor;
+        this.activa = true;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    // Getters & Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-	public String getTitulo() {
-		return titulo;
-	}
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 
-	public void setTitulo(String titulo) {
-		this.titulo = titulo;
-	}
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-	public String getDescripcion() {
-		return descripcion;
-	}
+    public LocalDateTime getFechaInicio() { return fechaInicio; }
+    public void setFechaInicio(LocalDateTime fechaInicio) { this.fechaInicio = fechaInicio; }
 
-	public void setDescripcion(String descripcion) {
-		this.descripcion = descripcion;
-	}
+    public LocalDateTime getFechaFin() { return fechaFin; }
+    public void setFechaFin(LocalDateTime fechaFin) { this.fechaFin = fechaFin; }
 
-	public LocalDateTime getFechaInicio() {
-		return fechaInicio;
-	}
+    public String getUbicacion() { return ubicacion; }
+    public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
 
-	public void setFechaInicio(LocalDateTime fechaInicio) {
-		this.fechaInicio = fechaInicio;
-	}
+    public boolean isActiva() { return activa; }
+    public void setActiva(boolean activa) { this.activa = activa; }
 
-	public LocalDateTime getFechaFin() {
-		return fechaFin;
-	}
+    public int getPuntosExtra() { return puntosExtra; }
+    public void setPuntosExtra(int puntosExtra) { this.puntosExtra = puntosExtra; }
 
-	public void setFechaFin(LocalDateTime fechaFin) {
-		this.fechaFin = fechaFin;
-	}
+    public Usuario getCreadoPor() { return creadoPor; }
+    public void setCreadoPor(Usuario creadoPor) { this.creadoPor = creadoPor; }
 
-	public String getUbicacion() {
-		return ubicacion;
-	}
-
-	public void setUbicacion(String ubicacion) {
-		this.ubicacion = ubicacion;
-	}
-
-	public boolean isActiva() {
-		return activa;
-	}
-
-	public void setActiva(boolean activa) {
-		this.activa = activa;
-	}
-
-	public Usuario getCreadoPor() {
-		return creadoPor;
-	}
-
-	public void setCreadoPor(Usuario creadoPor) {
-		this.creadoPor = creadoPor;
-	}
-
-	public Set<Entrega> getEntregas() {
-		return entregas;
-	}
-
-	public void setEntregas(Set<Entrega> entregas) {
-		this.entregas = entregas;
-	}
+    public Set<Entrega> getEntregas() { return entregas; }
+    public void setEntregas(Set<Entrega> entregas) { this.entregas = entregas; }
 }

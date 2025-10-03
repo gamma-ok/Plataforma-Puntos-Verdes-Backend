@@ -53,7 +53,6 @@ public class EntregaServiceImpl implements EntregaService {
 
         entrega.setValidada(validada);
         entrega.setFechaValidacion(java.time.LocalDateTime.now());
-        entrega.setPuntosGanados(puntosGanados);
         entrega.setRespuestaAdmin(respuestaAdmin);
         entrega.setObservaciones(observaciones);
 
@@ -65,7 +64,15 @@ public class EntregaServiceImpl implements EntregaService {
 
         if (validada && puntosGanados > 0) {
             Usuario ciudadano = entrega.getCiudadano();
-            ciudadano.setPuntosAcumulados(ciudadano.getPuntosAcumulados() + puntosGanados);
+            int totalPuntos = puntosGanados;
+
+            // 🔥 Si la entrega pertenece a una campaña activa, sumar puntos extra
+            if (entrega.getCampania() != null && entrega.getCampania().isActiva()) {
+                totalPuntos += entrega.getCampania().getPuntosExtra();
+            }
+
+            ciudadano.setPuntosAcumulados(ciudadano.getPuntosAcumulados() + totalPuntos);
+            entrega.setPuntosGanados(totalPuntos); // Se guarda el total de puntos ganados
             usuarioRepository.save(ciudadano);
         }
 
