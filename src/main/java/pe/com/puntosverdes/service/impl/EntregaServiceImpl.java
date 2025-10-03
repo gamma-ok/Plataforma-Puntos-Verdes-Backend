@@ -71,7 +71,14 @@ public class EntregaServiceImpl implements EntregaService {
 
         Entrega actualizada = entregaRepository.save(entrega);
 
-        // Convertimos a DTO
+        // Obtener el rol del usuario que realizó la entrega
+        String rolUsuario = null;
+        if (actualizada.getCiudadano() != null && !actualizada.getCiudadano().getUsuarioRoles().isEmpty()) {
+            rolUsuario = actualizada.getCiudadano().getUsuarioRoles()
+                    .iterator().next().getRol().getRolNombre();
+        }
+
+        // Convertimos a DTO incluyendo el rol
         return new EntregaValidadaDTO(
                 actualizada.getId(),
                 actualizada.getMaterial(),
@@ -82,7 +89,8 @@ public class EntregaServiceImpl implements EntregaService {
                 actualizada.getObservaciones(),
                 actualizada.getFechaValidacion(),
                 actualizada.getCiudadano() != null ? actualizada.getCiudadano().getUsername() : null,
-                actualizada.getPuntoVerde() != null ? actualizada.getPuntoVerde().getDireccion() : null
+                actualizada.getPuntoVerde() != null ? actualizada.getPuntoVerde().getDireccion() : null,
+                rolUsuario
         );
     }
 
@@ -117,7 +125,7 @@ public class EntregaServiceImpl implements EntregaService {
                 ubicacion
         );
     }
-    
+
     @Override
     public Entrega subirEvidencias(Long entregaId, List<String> rutasEvidencias) {
         return entregaRepository.findById(entregaId).map(entrega -> {

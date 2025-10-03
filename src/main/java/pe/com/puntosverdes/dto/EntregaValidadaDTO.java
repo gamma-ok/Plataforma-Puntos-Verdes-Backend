@@ -13,10 +13,12 @@ public class EntregaValidadaDTO {
     private LocalDateTime fechaValidacion;
     private String ciudadanoUsername;
     private String puntoVerdeDireccion;
+    private String rolUsuarioEntrega;
 
     public EntregaValidadaDTO(Long id, String material, double cantidad, int puntosGanados,
                               boolean validada, String respuestaAdmin, String observaciones,
-                              LocalDateTime fechaValidacion, String ciudadanoUsername, String puntoVerdeDireccion) {
+                              LocalDateTime fechaValidacion, String ciudadanoUsername,
+                              String puntoVerdeDireccion, String rolUsuarioEntrega) {
         this.id = id;
         this.material = material;
         this.cantidad = cantidad;
@@ -27,6 +29,7 @@ public class EntregaValidadaDTO {
         this.fechaValidacion = fechaValidacion;
         this.ciudadanoUsername = ciudadanoUsername;
         this.puntoVerdeDireccion = puntoVerdeDireccion;
+        this.rolUsuarioEntrega = rolUsuarioEntrega;
     }
 
     // Getters y setters
@@ -108,5 +111,13 @@ public class EntregaValidadaDTO {
 
     public void setPuntoVerdeDireccion(String puntoVerdeDireccion) {
         this.puntoVerdeDireccion = puntoVerdeDireccion;
+    }
+
+    public String getRolUsuarioEntrega() {
+        return rolUsuarioEntrega;
+    }
+
+    public void setRolUsuarioEntrega(String rolUsuarioEntrega) {
+        this.rolUsuarioEntrega = rolUsuarioEntrega;
     }
 }

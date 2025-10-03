@@ -31,6 +31,9 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 
     @Override
     public void desactivarPuntoVerde(Long id) {
-        puntoVerdeRepository.deleteById(id);
+        PuntoVerde puntoVerde = puntoVerdeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con id: " + id));
+        puntoVerde.setActivo(false);
+        puntoVerdeRepository.save(puntoVerde);
     }
 }

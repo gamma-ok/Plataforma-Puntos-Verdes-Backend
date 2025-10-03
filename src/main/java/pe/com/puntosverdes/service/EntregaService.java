@@ -20,4 +20,6 @@ public interface EntregaService {
     List<EntregaHistorialDTO> listarHistorialPorCiudadano(Long ciudadanoId);
     
     Entrega subirEvidencias(Long entregaId, List<String> rutasEvidencias);
+    
+    
 }
