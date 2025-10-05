@@ -10,4 +10,5 @@ public interface CanjeRepository extends JpaRepository<Canje, Long> {
     List<Canje> findByEstado(String estado);
     List<Canje> findByFechaSolicitudBetween(LocalDateTime inicio, LocalDateTime fin);
     List<Canje> findByUsuarioIdAndEstado(Long usuarioId, String estado);
+    long countByEstado(String estado);
 }

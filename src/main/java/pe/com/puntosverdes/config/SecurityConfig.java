@@ -97,6 +97,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
                 .requestMatchers(HttpMethod.PUT, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
+                // --- DASHBOARD ---
+                // Solo accesible por ADMIN o MUNICIPALIDAD
+                .requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+                
                 // --- Cualquier otra ruta requiere autenticación ---
                 .anyRequest().authenticated()
             )

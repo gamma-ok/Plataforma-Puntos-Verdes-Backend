@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface RecompensaRepository extends JpaRepository<Recompensa, Long> {
     List<Recompensa> findByActivoTrue();
+    long countByActivoTrue();
 }

@@ -13,4 +13,5 @@ public interface EntregaRepository extends JpaRepository<Entrega, Long> {
     List<Entrega> findByRecolectorId(Long recolectorId);
     List<Entrega> findByValidadaTrue();
     Entrega findTopByCiudadanoIdOrderByFechaEntregaDesc(Long ciudadanoId);
+    long countByValidadaTrue();
 }

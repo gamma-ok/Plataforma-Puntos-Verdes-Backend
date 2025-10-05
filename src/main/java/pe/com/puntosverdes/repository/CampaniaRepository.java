@@ -11,4 +11,5 @@ public interface CampaniaRepository extends JpaRepository<Campania, Long> {
     List<Campania> findByActivaTrue();
     List<Campania> findByTituloContainingIgnoreCase(String titulo);
     List<Campania> findByUbicacionContainingIgnoreCase(String ubicacion);
+    long countByActivaTrue();
 }
