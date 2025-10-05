@@ -10,6 +10,7 @@ import pe.com.puntosverdes.dto.UsuarioPerfilDTO;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.UsuarioService;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -201,8 +202,9 @@ public class UsuarioController {
     
     // Asignar rol (solo ADMIN debería acceder a este endpoint)
     @PutMapping("/{id}/asignar-rol")
-    public ResponseEntity<Usuario> asignarRol(@PathVariable Long id, @RequestParam("rol") String rol) {
-        Usuario usuario = usuarioService.asignarRol(id, rol);
-        return ResponseEntity.ok(usuario);
+    public ResponseEntity<?> asignarRol(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String rol = body.get("rolNombre");
+        usuarioService.asignarRol(id, rol);
+        return ResponseEntity.ok("Rol asignado correctamente");
     }
 }
