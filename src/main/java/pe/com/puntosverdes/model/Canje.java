@@ -8,87 +8,121 @@ import java.time.LocalDateTime;
 @Table(name = "canjes")
 public class Canje {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "usuario_id", nullable = false)
-	@JsonIgnoreProperties({ "usuarioRoles" })
-	private Usuario usuario;
+    // Usuario que solicita el canje
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonIgnoreProperties({"usuarioRoles"})
+    private Usuario usuario;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "recompensa_id", nullable = false)
-	private Recompensa recompensa;
+    // Recompensa que desea canjear
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recompensa_id", nullable = false)
+    private Recompensa recompensa;
 
-	private LocalDateTime fechaCanje = LocalDateTime.now();
-	private int puntosUsados;
-	private String estado = "PENDIENTE"; // PENDIENTE, APROBADO, RECHAZADO
-	private String respuestaAdmin;
+    // 📅 Fecha de solicitud (cuando el ciudadano pide el canje)
+    private LocalDateTime fechaSolicitud = LocalDateTime.now();
 
-	public Canje() {
-	}
+    // 📅 Fecha en que el admin aprueba/rechaza el canje
+    private LocalDateTime fechaResolucion;
 
-	public Canje(Usuario usuario, Recompensa recompensa, int puntosUsados) {
-		this.usuario = usuario;
-		this.recompensa = recompensa;
-		this.puntosUsados = puntosUsados;
-	}
+    // Puntos que el usuario usa para este canje
+    private int puntosUsados;
 
-	// Getters y Setters
-	public Long getId() {
-		return id;
-	}
+    // Estado del canje: PENDIENTE, APROBADO o RECHAZADO
+    private String estado = "PENDIENTE";
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    // Comentario o respuesta del admin/municipalidad
+    @Column(length = 1000)
+    private String respuestaAdmin;
 
-	public Usuario getUsuario() {
-		return usuario;
-	}
+    // Motivo del rechazo (opcional, solo si fue RECHAZADO)
+    @Column(length = 1000)
+    private String motivoRechazo;
 
-	public void setUsuario(Usuario usuario) {
-		this.usuario = usuario;
-	}
+    public Canje() {}
 
-	public Recompensa getRecompensa() {
-		return recompensa;
-	}
+    public Canje(Usuario usuario, Recompensa recompensa, int puntosUsados) {
+        this.usuario = usuario;
+        this.recompensa = recompensa;
+        this.puntosUsados = puntosUsados;
+        this.fechaSolicitud = LocalDateTime.now();
+        this.estado = "PENDIENTE";
+    }
 
-	public void setRecompensa(Recompensa recompensa) {
-		this.recompensa = recompensa;
-	}
+    // --- Getters y Setters ---
+    public Long getId() {
+        return id;
+    }
 
-	public LocalDateTime getFechaCanje() {
-		return fechaCanje;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setFechaCanje(LocalDateTime fechaCanje) {
-		this.fechaCanje = fechaCanje;
-	}
+    public Usuario getUsuario() {
+        return usuario;
+    }
 
-	public int getPuntosUsados() {
-		return puntosUsados;
-	}
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 
-	public void setPuntosUsados(int puntosUsados) {
-		this.puntosUsados = puntosUsados;
-	}
+    public Recompensa getRecompensa() {
+        return recompensa;
+    }
 
-	public String getEstado() {
-		return estado;
-	}
+    public void setRecompensa(Recompensa recompensa) {
+        this.recompensa = recompensa;
+    }
 
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
+    public LocalDateTime getFechaSolicitud() {
+        return fechaSolicitud;
+    }
 
-	public String getRespuestaAdmin() {
-		return respuestaAdmin;
-	}
+    public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
+        this.fechaSolicitud = fechaSolicitud;
+    }
 
-	public void setRespuestaAdmin(String respuestaAdmin) {
-		this.respuestaAdmin = respuestaAdmin;
-	}
+    public LocalDateTime getFechaResolucion() {
+        return fechaResolucion;
+    }
+
+    public void setFechaResolucion(LocalDateTime fechaResolucion) {
+        this.fechaResolucion = fechaResolucion;
+    }
+
+    public int getPuntosUsados() {
+        return puntosUsados;
+    }
+
+    public void setPuntosUsados(int puntosUsados) {
+        this.puntosUsados = puntosUsados;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getRespuestaAdmin() {
+        return respuestaAdmin;
+    }
+
+    public void setRespuestaAdmin(String respuestaAdmin) {
+        this.respuestaAdmin = respuestaAdmin;
+    }
+
+    public String getMotivoRechazo() {
+        return motivoRechazo;
+    }
+
+    public void setMotivoRechazo(String motivoRechazo) {
+        this.motivoRechazo = motivoRechazo;
+    }
 }

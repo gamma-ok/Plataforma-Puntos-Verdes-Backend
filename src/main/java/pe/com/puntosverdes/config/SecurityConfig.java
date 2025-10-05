@@ -3,7 +3,6 @@ package pe.com.puntosverdes.config;
 import pe.com.puntosverdes.security.JwtAuthenticationEntryPoint;
 import pe.com.puntosverdes.security.JwtAuthenticationFilter;
 import pe.com.puntosverdes.service.impl.UserDetailsServiceImpl;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +51,7 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // --- Configuración de seguridad principal ---
+    // --- Configuración principal de seguridad ---
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -65,6 +64,14 @@ public class SecurityConfig {
                 .requestMatchers("/api/usuarios/registrar").permitAll()
                 .requestMatchers(HttpMethod.GET, "/entregas/evidencias/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/incidencias/evidencias/**").permitAll()
+
+                // --- CANJES ---
+                // Solicitar canje -> CIUDADANO o RECOLECTOR
+                .requestMatchers(HttpMethod.POST, "/api/canjes/solicitar").hasAnyRole("CIUDADANO", "RECOLECTOR")
+                // Resolver (aprobar o rechazar) -> ADMIN o MUNICIPALIDAD
+                .requestMatchers(HttpMethod.PUT, "/api/canjes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+                // Consultar (listar, obtener por ID, por usuario)
+                .requestMatchers(HttpMethod.GET, "/api/canjes/**").authenticated()
 
                 // --- Gestión de usuarios ---
                 .requestMatchers("/api/usuarios/{id}/asignar-rol").hasRole("ADMIN")
@@ -85,7 +92,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
                 .requestMatchers(HttpMethod.PUT, "/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-                // --- CAMPANIAS ---
+                // --- CAMPAÑAS ---
                 .requestMatchers(HttpMethod.GET, "/campanias/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
                 .requestMatchers(HttpMethod.PUT, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
