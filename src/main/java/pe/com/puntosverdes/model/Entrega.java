@@ -56,7 +56,7 @@ public class Entrega {
 	@Column(name = "url")
 	private List<String> evidencias = new ArrayList<>();
 
-	// 🔥 Respuesta final al ciudadano (motivo de rechazo o agradecimiento)
+	// Respuesta final al ciudadano (motivo de rechazo o agradecimiento)
 	@Column(length = 2000)
 	private String respuestaAdmin;
 
