@@ -36,4 +36,9 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
         puntoVerde.setActivo(false);
         puntoVerdeRepository.save(puntoVerde);
     }
+
+    @Override
+    public List<PuntoVerde> listarPuntosActivos() {
+        return puntoVerdeRepository.findByActivoTrue();
+    }
 }
