@@ -33,7 +33,7 @@ public class SecurityConfig {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    // Autenticación y cifrado
+    // --- Beans de autenticación ---
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -52,7 +52,7 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // Filtros y reglas de acceso
+    // --- Configuración de seguridad principal ---
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -60,41 +60,43 @@ public class SecurityConfig {
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
 
-                // Rutas públicas
+                // --- Rutas públicas ---
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/usuarios/registrar").permitAll()
                 .requestMatchers(HttpMethod.GET, "/entregas/evidencias/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/incidencias/evidencias/**").permitAll()
 
-                // Gestión de usuarios
+                // --- Gestión de usuarios ---
                 .requestMatchers("/api/usuarios/{id}/asignar-rol").hasRole("ADMIN")
 
-                // ENTREGAS
+                // --- ENTREGAS ---
                 .requestMatchers(HttpMethod.POST, "/entregas/**").hasRole("CIUDADANO")
                 .requestMatchers(HttpMethod.PUT, "/entregas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
                 .requestMatchers(HttpMethod.GET, "/entregas/**").authenticated()
 
-                // INCIDENCIAS
+                // --- INCIDENCIAS ---
+                .requestMatchers(HttpMethod.POST, "/incidencias/{id}/evidencias").hasRole("RECOLECTOR")
                 .requestMatchers(HttpMethod.POST, "/incidencias/**").hasRole("RECOLECTOR")
-                .requestMatchers(HttpMethod.GET, "/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR")
                 .requestMatchers(HttpMethod.PUT, "/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+                .requestMatchers(HttpMethod.GET, "/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR")
 
-                // PUNTOS VERDES
+                // --- PUNTOS VERDES ---
                 .requestMatchers(HttpMethod.GET, "/puntos-verdes/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
                 .requestMatchers(HttpMethod.PUT, "/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-                // CAMPANIAS
+                // --- CAMPANIAS ---
                 .requestMatchers(HttpMethod.GET, "/campanias/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
                 .requestMatchers(HttpMethod.PUT, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-                // Cualquier otra ruta
+                // --- Cualquier otra ruta requiere autenticación ---
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // Filtro JWT antes de la autenticación estándar
+        // --- Filtro JWT ---
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

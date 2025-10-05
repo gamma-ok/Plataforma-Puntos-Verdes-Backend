@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,7 @@ import pe.com.puntosverdes.dto.IncidenciaRespuestaDTO;
 import pe.com.puntosverdes.dto.IncidenciaValidacionDTO;
 import pe.com.puntosverdes.model.Incidencia;
 import pe.com.puntosverdes.model.Usuario;
+import pe.com.puntosverdes.repository.IncidenciaRepository;
 import pe.com.puntosverdes.service.IncidenciaService;
 import pe.com.puntosverdes.service.UsuarioService;
 
@@ -27,95 +29,124 @@ import java.util.*;
 @CrossOrigin("*")
 public class IncidenciaController {
 
-	@Autowired
-	private IncidenciaService incidenciaService;
+    @Autowired
+    private IncidenciaService incidenciaService;
 
-	@Autowired
-	private UsuarioService usuarioService;
+    @Autowired
+    private UsuarioService usuarioService;
 
-	@Value("${upload.incidencias.dir}")
-	private String uploadDir;
+    @Autowired
+    private IncidenciaRepository incidenciaRepository;
 
-	@PostMapping("/")
-	public ResponseEntity<Incidencia> registrar(@RequestBody Incidencia incidencia, Authentication auth) {
-		Usuario usuario = usuarioService.obtenerUsuarioPorUsername(auth.getName());
+    @Value("${upload.incidencias.dir}")
+    private String uploadDir;
 
-		// Solo recolectores pueden registrar incidencias
-		boolean esRecolector = usuario.getUsuarioRoles().stream()
-				.anyMatch(r -> r.getRol().getRolNombre().equalsIgnoreCase("RECOLECTOR"));
+    // =======================
+    // REGISTRAR INCIDENCIA
+    // =======================
+    @PostMapping("/")
+    public ResponseEntity<Incidencia> registrar(@RequestBody Incidencia incidencia, Authentication auth) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(auth.getName());
 
-		if (!esRecolector) {
-			return ResponseEntity.status(403).build(); // FORBIDDEN
-		}
+        // Solo recolectores pueden registrar incidencias
+        boolean esRecolector = usuario.getUsuarioRoles().stream()
+                .anyMatch(r -> r.getRol().getRolNombre().equalsIgnoreCase("RECOLECTOR"));
 
-		incidencia.setReportadoPor(usuario);
-		return ResponseEntity.ok(incidenciaService.registrarIncidencia(incidencia));
-	}
+        if (!esRecolector) {
+            return ResponseEntity.status(403).build(); // FORBIDDEN
+        }
 
-	@GetMapping("/")
-	public ResponseEntity<List<Incidencia>> listar() {
-		return ResponseEntity.ok(incidenciaService.listarIncidencias());
-	}
+        incidencia.setReportadoPor(usuario);
+        return ResponseEntity.ok(incidenciaService.registrarIncidencia(incidencia));
+    }
 
-	@GetMapping("/usuario/{usuarioId}")
-	public ResponseEntity<List<Incidencia>> listarPorUsuario(@PathVariable Long usuarioId) {
-		return ResponseEntity.ok(incidenciaService.listarPorUsuario(usuarioId));
-	}
+    // =======================
+    // LISTAR INCIDENCIAS
+    // =======================
+    @GetMapping("/")
+    public ResponseEntity<List<Incidencia>> listar() {
+        return ResponseEntity.ok(incidenciaService.listarIncidencias());
+    }
 
-	@PutMapping("/{id}/validar")
-	public ResponseEntity<IncidenciaRespuestaDTO> validar(@PathVariable Long id,
-			@RequestBody IncidenciaValidacionDTO dto, Authentication auth) {
-		Usuario admin = usuarioService.obtenerUsuarioPorUsername(auth.getName());
-		return ResponseEntity.ok(incidenciaService.validarIncidencia(id, dto, admin.getId()));
-	}
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<Incidencia>> listarPorUsuario(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(incidenciaService.listarPorUsuario(usuarioId));
+    }
 
-	// 📌 Subir evidencias
-	@PostMapping("/{id}/evidencias")
-	public ResponseEntity<Incidencia> subirEvidencias(@PathVariable Long id,
-			@RequestParam("files") List<MultipartFile> files) {
+    // =======================
+    // VALIDAR INCIDENCIA
+    // =======================
+    @PutMapping("/{id}/validar")
+    public ResponseEntity<IncidenciaRespuestaDTO> validar(
+            @PathVariable Long id,
+            @RequestBody IncidenciaValidacionDTO dto,
+            Authentication auth) {
 
-		List<String> rutasGuardadas = new ArrayList<>();
+        Usuario admin = usuarioService.obtenerUsuarioPorUsername(auth.getName());
+        return ResponseEntity.ok(incidenciaService.validarIncidencia(id, dto, admin.getId()));
+    }
 
-		try {
-			File directorio = new File(uploadDir);
-			if (!directorio.exists()) {
-				directorio.mkdirs();
-			}
+    // =======================
+    // SUBIR EVIDENCIAS
+    // =======================
+    @PostMapping("/{id}/evidencias")
+    public ResponseEntity<Map<String, Object>> subirEvidencias(
+            @PathVariable Long id,
+            @RequestParam("files") List<MultipartFile> files) {
 
-			for (MultipartFile file : files) {
-				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-				String filePath = uploadDir + fileName;
+        try {
+            // Crear carpeta si no existe
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
 
-				file.transferTo(new File(filePath));
+            // Guardar archivos
+            List<String> rutasEvidencias = new ArrayList<>();
+            for (MultipartFile file : files) {
+                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                String filePath = uploadDir + fileName;
 
-				rutasGuardadas.add(fileName); // guardamos solo el nombre del archivo
-			}
+                File dest = new File(filePath);
+                file.transferTo(dest);
 
-			Incidencia incidenciaActualizada = incidenciaService.subirEvidencias(id, rutasGuardadas);
+                rutasEvidencias.add(fileName);
+            }
 
-			return ResponseEntity.ok(incidenciaActualizada);
+            // Actualizar en BD
+            Incidencia actualizada = incidenciaService.subirEvidencias(id, rutasEvidencias);
 
-		} catch (Exception e) {
-			return ResponseEntity.status(500).build();
-		}
-	}
+            return ResponseEntity.ok(Map.of(
+                    "incidenciaId", actualizada.getId(),
+                    "evidencias", rutasEvidencias
+            ));
 
-	// 📌 Servir evidencias
-	@GetMapping("/evidencias/{fileName}")
-	public ResponseEntity<Resource> verEvidencia(@PathVariable String fileName) {
-		try {
-			Path path = Paths.get(uploadDir).resolve(fileName);
-			Resource resource = new UrlResource(path.toUri());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
 
-			if (resource.exists() || resource.isReadable()) {
-				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG) // soporta jpg
-						.body(resource);
-			} else {
-				return ResponseEntity.notFound().build();
-			}
+    // =======================
+    // VISUALIZAR EVIDENCIAS
+    // =======================
+    @GetMapping("/evidencias/{fileName:.+}")
+    public ResponseEntity<Resource> verEvidencia(@PathVariable String fileName) {
+        try {
+            Path path = Paths.get(uploadDir).resolve(fileName);
+            Resource resource = new UrlResource(path.toUri());
 
-		} catch (MalformedURLException e) {
-			return ResponseEntity.badRequest().build();
-		}
-	}
+            if (resource.exists() || resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

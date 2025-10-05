@@ -73,11 +73,16 @@ public class Usuario implements UserDetails {
 	@Override
 	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		Set<Authority> autoridades = new HashSet<>();
-		this.usuarioRoles.forEach(usuarioRol -> {
-			autoridades.add(new Authority(usuarioRol.getRol().getRolNombre()));
-		});
-		return autoridades;
+	    Set<Authority> autoridades = new HashSet<>();
+	    this.usuarioRoles.forEach(usuarioRol -> {
+	        // Asegura que todos los roles tengan el prefijo ROLE_
+	        String rolNombre = usuarioRol.getRol().getRolNombre();
+	        if (!rolNombre.startsWith("ROLE_")) {
+	            rolNombre = "ROLE_" + rolNombre;
+	        }
+	        autoridades.add(new Authority(rolNombre));
+	    });
+	    return autoridades;
 	}
 
 	@Override
