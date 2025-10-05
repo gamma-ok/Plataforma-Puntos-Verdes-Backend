@@ -5,17 +5,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import pe.com.puntosverdes.dto.EntregaEvidenciaDTO;
-import pe.com.puntosverdes.dto.EntregaHistorialDTO;
-import pe.com.puntosverdes.dto.EntregaValidacionDTO;
-import pe.com.puntosverdes.dto.EntregaValidadaDTO;
-import pe.com.puntosverdes.dto.UltimaEntregaDTO;
+import pe.com.puntosverdes.dto.*;
 import pe.com.puntosverdes.model.Entrega;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.EntregaService;
@@ -25,9 +21,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/entregas")
@@ -40,9 +34,13 @@ public class EntregaController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // Ruta configurada en application.properties
-    @Value("${upload.dir}")
+    // Ruta base para las subidas (definida en application.properties)
+    @Value("${upload.dir:uploads/entregas/}")
     private String uploadDir;
+
+    // ======================
+    // CRUD BÁSICO
+    // ======================
 
     @PostMapping("/")
     public ResponseEntity<Entrega> registrarEntrega(@RequestBody Entrega entrega) {
@@ -64,12 +62,17 @@ public class EntregaController {
         return ResponseEntity.ok(entregaService.listarEntregasPorRecolector(recolectorId));
     }
 
+    // ======================
+    // VALIDAR ENTREGA
+    // ======================
     @PutMapping("/{id}/validar")
     public ResponseEntity<EntregaValidadaDTO> validarEntrega(
             @PathVariable Long id,
             @RequestBody EntregaValidacionDTO dto,
             Authentication authentication) {
+
         Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
+
         EntregaValidadaDTO entrega = entregaService.validarEntrega(
                 id,
                 dto.isValidada(),
@@ -78,9 +81,13 @@ public class EntregaController {
                 dto.getObservaciones(),
                 usuario.getId()
         );
+
         return ResponseEntity.ok(entrega);
     }
 
+    // ======================
+    // HISTORIAL Y ÚLTIMA ENTREGA
+    // ======================
     @GetMapping("/ciudadano/{ciudadanoId}/ultima")
     public ResponseEntity<UltimaEntregaDTO> ultimaEntrega(@PathVariable Long ciudadanoId) {
         return ResponseEntity.ok(entregaService.obtenerUltimaEntregaPorCiudadano(ciudadanoId));
@@ -90,49 +97,61 @@ public class EntregaController {
     public ResponseEntity<List<EntregaHistorialDTO>> historial(@PathVariable Long ciudadanoId) {
         return ResponseEntity.ok(entregaService.listarHistorialPorCiudadano(ciudadanoId));
     }
-    
-    // Subir evidencias
+
+    // ======================
+    // SUBIR EVIDENCIAS
+    // ======================
     @PostMapping("/{id}/evidencias")
-    public ResponseEntity<EntregaEvidenciaDTO> subirEvidencias(
+    public ResponseEntity<Map<String, Object>> subirEvidencias(
             @PathVariable Long id,
             @RequestParam("files") List<MultipartFile> files) {
 
-        List<String> rutasGuardadas = new ArrayList<>();
-
         try {
-            File directorio = new File(uploadDir);
-            if (!directorio.exists()) {
-                directorio.mkdirs();
+            // Crear carpeta si no existe
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
             }
 
+            List<String> rutasEvidencias = new ArrayList<>();
             for (MultipartFile file : files) {
                 String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-                String filePath = uploadDir + fileName;
-                file.transferTo(new File(filePath));
-                rutasGuardadas.add(fileName); // 🔥 Guardamos solo el nombre, no la ruta completa
+                String filePath = uploadDir + File.separator + fileName;
+
+                File dest = new File(filePath);
+                file.transferTo(dest);
+
+                rutasEvidencias.add(filePath);
             }
 
-            Entrega entregaActualizada = entregaService.subirEvidencias(id, rutasGuardadas);
+            // Registrar rutas en la base de datos
+            Entrega actualizada = entregaService.subirEvidencias(id, rutasEvidencias);
 
-            return ResponseEntity.ok(
-                    new EntregaEvidenciaDTO(entregaActualizada.getId(), entregaActualizada.getEvidencias())
-            );
+            Map<String, Object> response = new HashMap<>();
+            response.put("entregaId", actualizada.getId());
+            response.put("evidencias", rutasEvidencias);
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).build();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
-    // Servir evidencias como imágenes
+    // ======================
+    // VISUALIZAR EVIDENCIAS
+    // ======================
     @GetMapping("/evidencias/{fileName:.+}")
     public ResponseEntity<Resource> verEvidencia(@PathVariable String fileName) {
         try {
-            Path filePath = Paths.get(uploadDir).resolve(fileName).normalize();
+        	Path filePath = Paths.get(uploadDir + File.separator + fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
 
             if (resource.exists()) {
                 return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) // por defecto, puedes detectar tipo real
+                        .contentType(MediaType.IMAGE_JPEG)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
                         .body(resource);
             } else {
