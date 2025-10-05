@@ -3,9 +3,11 @@ package pe.com.puntosverdes.config;
 import pe.com.puntosverdes.security.JwtAuthenticationEntryPoint;
 import pe.com.puntosverdes.security.JwtAuthenticationFilter;
 import pe.com.puntosverdes.service.impl.UserDetailsServiceImpl;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -31,6 +33,7 @@ public class SecurityConfig {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    // Autenticación y cifrado
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -49,24 +52,49 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    // Filtros y reglas de acceso
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http
+            .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
-                    // Públicos
-                    .requestMatchers("/auth/**").permitAll()
-                    .requestMatchers("/api/usuarios/registrar").permitAll()
 
-                    // Solo ADMIN puede asignar roles
-                    .requestMatchers("/api/usuarios/{id}/asignar-rol").hasAuthority("ADMIN")
+                // Rutas públicas
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/api/usuarios/registrar").permitAll()
+                .requestMatchers(HttpMethod.GET, "/entregas/evidencias/**").permitAll()
 
-                    // El resto de usuarios deben estar autenticados
-                    .anyRequest().authenticated()
+                // Gestión de usuarios
+                .requestMatchers("/api/usuarios/{id}/asignar-rol").hasRole("ADMIN")
+
+                // ENTREGAS
+                .requestMatchers(HttpMethod.POST, "/entregas/**").hasRole("CIUDADANO")
+                .requestMatchers(HttpMethod.PUT, "/entregas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+                .requestMatchers(HttpMethod.GET, "/entregas/**").authenticated()
+
+                // INCIDENCIAS
+                .requestMatchers(HttpMethod.POST, "/incidencias/**").hasRole("RECOLECTOR")
+                .requestMatchers(HttpMethod.GET, "/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR")
+                .requestMatchers(HttpMethod.PUT, "/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+
+                // PUNTOS VERDES
+                .requestMatchers(HttpMethod.GET, "/puntos-verdes/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+                .requestMatchers(HttpMethod.PUT, "/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+
+                // CAMPANIAS
+                .requestMatchers(HttpMethod.GET, "/campanias/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+                .requestMatchers(HttpMethod.PUT, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+
+                // Cualquier otra ruta
+                .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+        // Filtro JWT antes de la autenticación estándar
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
