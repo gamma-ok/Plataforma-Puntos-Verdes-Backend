@@ -11,21 +11,35 @@ import java.util.List;
 @Service
 public class RecompensaServiceImpl implements RecompensaService {
 
-    @Autowired
-    private RecompensaRepository recompensaRepository;
+	@Autowired
+	private RecompensaRepository recompensaRepository;
 
-    @Override
-    public Recompensa crearRecompensa(Recompensa recompensa) {
-        return recompensaRepository.save(recompensa);
-    }
+	@Override
+	public Recompensa crearRecompensa(Recompensa recompensa) {
+		return recompensaRepository.save(recompensa);
+	}
 
-    @Override
-    public List<Recompensa> listarRecompensas() {
-        return recompensaRepository.findAll();
-    }
+	@Override
+	public List<Recompensa> listarRecompensas() {
+		return recompensaRepository.findAll();
+	}
 
-    @Override
-    public void eliminarRecompensa(Long id) {
-        recompensaRepository.deleteById(id);
-    }
+	@Override
+	public Recompensa obtenerPorId(Long id) {
+		return recompensaRepository.findById(id).orElse(null);
+	}
+
+	@Override
+	public void actualizarEstado(Long id, boolean activo) {
+		Recompensa r = obtenerPorId(id);
+		if (r != null) {
+			r.setActivo(activo);
+			recompensaRepository.save(r);
+		}
+	}
+
+	@Override
+	public void eliminarRecompensa(Long id) {
+		recompensaRepository.deleteById(id);
+	}
 }

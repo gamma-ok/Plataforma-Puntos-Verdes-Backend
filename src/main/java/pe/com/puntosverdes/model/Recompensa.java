@@ -1,6 +1,7 @@
 package pe.com.puntosverdes.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 
 @Entity
 @Table(name = "recompensas")
@@ -13,18 +14,21 @@ public class Recompensa {
 	private String nombre;
 	private String descripcion;
 
+	@Min(1)
 	@Column(nullable = false)
 	private int puntosNecesarios;
 
+	private int stock = 0;
 	private boolean activo = true;
 
 	public Recompensa() {
 	}
 
-	public Recompensa(String nombre, String descripcion, int puntosNecesarios) {
+	public Recompensa(String nombre, String descripcion, int puntosNecesarios, int stock) {
 		this.nombre = nombre;
 		this.descripcion = descripcion;
 		this.puntosNecesarios = puntosNecesarios;
+		this.stock = stock;
 		this.activo = true;
 	}
 
@@ -67,5 +71,13 @@ public class Recompensa {
 
 	public void setActivo(boolean activo) {
 		this.activo = activo;
+	}
+
+	public int getStock() {
+		return stock;
+	}
+
+	public void setStock(int stock) {
+		this.stock = stock;
 	}
 }
