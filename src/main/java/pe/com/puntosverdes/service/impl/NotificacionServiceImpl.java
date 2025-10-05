@@ -23,4 +23,17 @@ public class NotificacionServiceImpl implements NotificacionService {
     public List<Notificacion> listarNotificacionesPorDestinatario(Long destinatarioId) {
         return notificacionRepository.findByDestinatarioId(destinatarioId);
     }
+
+    @Override
+    public List<Notificacion> listarNoLeidasPorUsuario(Long destinatarioId) {
+        return notificacionRepository.findByDestinatarioIdAndLeidaFalse(destinatarioId);
+    }
+
+    @Override
+    public void marcarComoLeida(Long notificacionId) {
+        notificacionRepository.findById(notificacionId).ifPresent(n -> {
+            n.setLeida(true);
+            notificacionRepository.save(n);
+        });
+    }
 }

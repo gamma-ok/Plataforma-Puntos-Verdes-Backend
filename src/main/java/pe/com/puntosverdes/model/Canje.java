@@ -2,7 +2,6 @@ package pe.com.puntosverdes.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,7 +12,6 @@ public class Canje {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// Usuario que canjea
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "usuario_id", nullable = false)
 	@JsonIgnoreProperties({ "usuarioRoles" })
@@ -24,8 +22,9 @@ public class Canje {
 	private Recompensa recompensa;
 
 	private LocalDateTime fechaCanje = LocalDateTime.now();
-
-	private int puntosUsados; // puntos que se utilizaron en el canje
+	private int puntosUsados;
+	private String estado = "PENDIENTE"; // PENDIENTE, APROBADO, RECHAZADO
+	private String respuestaAdmin;
 
 	public Canje() {
 	}
@@ -34,10 +33,9 @@ public class Canje {
 		this.usuario = usuario;
 		this.recompensa = recompensa;
 		this.puntosUsados = puntosUsados;
-		this.fechaCanje = LocalDateTime.now();
 	}
 
-	// Getters & Setters
+	// Getters y Setters
 	public Long getId() {
 		return id;
 	}
@@ -76,5 +74,21 @@ public class Canje {
 
 	public void setPuntosUsados(int puntosUsados) {
 		this.puntosUsados = puntosUsados;
+	}
+
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
+
+	public String getRespuestaAdmin() {
+		return respuestaAdmin;
+	}
+
+	public void setRespuestaAdmin(String respuestaAdmin) {
+		this.respuestaAdmin = respuestaAdmin;
 	}
 }

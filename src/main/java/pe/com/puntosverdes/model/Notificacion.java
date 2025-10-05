@@ -2,7 +2,6 @@ package pe.com.puntosverdes.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,17 +18,14 @@ public class Notificacion {
 
 	private LocalDateTime fechaEnvio = LocalDateTime.now();
 
-	/**
-	 * Destinatario null => notificación global / campaña a todos. Si no es null =>
-	 * notificación dirigida a un usuario en particular.
-	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "destinatario_id")
 	@JsonIgnoreProperties({ "usuarioRoles" })
 	private Usuario destinatario;
 
 	private boolean leida = false;
-	private boolean esCampana = false; // si es parte de una campaña masiva
+	private boolean esCampana = false;
+	private boolean esPuntoVerde = false;
 
 	public Notificacion() {
 	}
@@ -39,8 +35,6 @@ public class Notificacion {
 		this.mensaje = mensaje;
 		this.destinatario = destinatario;
 		this.esCampana = esCampana;
-		this.fechaEnvio = LocalDateTime.now();
-		this.leida = false;
 	}
 
 	// Getters & Setters
@@ -98,5 +92,13 @@ public class Notificacion {
 
 	public void setEsCampana(boolean esCampana) {
 		this.esCampana = esCampana;
+	}
+
+	public boolean isEsPuntoVerde() {
+		return esPuntoVerde;
+	}
+
+	public void setEsPuntoVerde(boolean esPuntoVerde) {
+		this.esPuntoVerde = esPuntoVerde;
 	}
 }
