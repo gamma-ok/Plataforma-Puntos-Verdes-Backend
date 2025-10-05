@@ -11,188 +11,135 @@ import java.util.List;
 @Table(name = "entregas")
 public class Entrega {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	// Ciudadano que realiza la entrega
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ciudadano_id", nullable = false)
-	@JsonIgnoreProperties({ "usuarioRoles" })
-	private Usuario ciudadano;
+    // Ciudadano que realiza la entrega
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ciudadano_id", nullable = false)
+    @JsonIgnoreProperties({"usuarioRoles"})
+    private Usuario ciudadano;
 
-	// Recolector que valida la entrega (nullable hasta que la valide)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "recolector_id")
-	@JsonIgnoreProperties({ "usuarioRoles" })
-	private Usuario recolector;
+    // Recolector que valida la entrega (nullable hasta que la valide)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recolector_id")
+    @JsonIgnoreProperties({"usuarioRoles"})
+    private Usuario recolector;
 
-	// Punto verde donde se realizó la entrega
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "punto_verde_id", nullable = false)
-	private PuntoVerde puntoVerde;
+    // Punto verde donde se realizó la entrega
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "punto_verde_id", nullable = false)
+    private PuntoVerde puntoVerde;
 
-	// Campaña a la que pertenece la entrega
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "campania_id")
-	@JsonIgnoreProperties({ "entregas" })
-	private Campania campania;
+    // Campaña a la que pertenece la entrega
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "campania_id")
+    @JsonIgnoreProperties({"entregas"})
+    private Campania campania;
 
-	private String material;
-	private Double cantidad;
-	private String unidad;
+    private String material;
+    private Double cantidad;
+    private String unidad;
 
-	private LocalDateTime fechaEntrega = LocalDateTime.now();
+    private LocalDateTime fechaEntrega = LocalDateTime.now();
 
-	private boolean validada = false;
-	private LocalDateTime fechaValidacion;
-	private String observaciones; // uso interno del recolector/admin
+    private boolean validada = false;
+    private LocalDateTime fechaValidacion;
+    private String observaciones; // uso interno del recolector/admin
 
-	private int puntosGanados = 0;
+    private int puntosGanados = 0;
 
-	// Evidencias: URLs de imágenes subidas
-	@ElementCollection
-	@CollectionTable(name = "entrega_evidencias", joinColumns = @JoinColumn(name = "entrega_id"))
-	@Column(name = "url")
-	private List<String> evidencias = new ArrayList<>();
+    // Evidencias: URLs de imágenes subidas
+    @ElementCollection
+    @CollectionTable(name = "entrega_evidencias", joinColumns = @JoinColumn(name = "entrega_id"))
+    @Column(name = "url")
+    private List<String> evidencias = new ArrayList<>();
 
-	// Respuesta final al ciudadano (motivo de rechazo o agradecimiento)
-	@Column(length = 2000)
-	private String respuestaAdmin;
+    // Respuesta final al ciudadano (motivo de rechazo o agradecimiento)
+    @Column(length = 2000)
+    private String respuestaAdmin;
 
-	public Entrega() {
-	}
+    // Quién validó o revisó la entrega (admin / municipalidad)
+    private String validadoPor;
 
-	// Constructor mínimo
-	public Entrega(Usuario ciudadano, PuntoVerde puntoVerde, String material, Double cantidad, String unidad) {
-		this.ciudadano = ciudadano;
-		this.puntoVerde = puntoVerde;
-		this.material = material;
-		this.cantidad = cantidad;
-		this.unidad = unidad;
-		this.fechaEntrega = LocalDateTime.now();
-		this.validada = false;
-		this.puntosGanados = 0;
-	}
+    public Entrega() {
+    }
 
-	// Getters & Setters
-	public Long getId() {
-		return id;
-	}
+    // Constructor mínimo
+    public Entrega(Usuario ciudadano, PuntoVerde puntoVerde, String material, Double cantidad, String unidad) {
+        this.ciudadano = ciudadano;
+        this.puntoVerde = puntoVerde;
+        this.material = material;
+        this.cantidad = cantidad;
+        this.unidad = unidad;
+        this.fechaEntrega = LocalDateTime.now();
+        this.validada = false;
+        this.puntosGanados = 0;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    // Getters & Setters
+    public Long getId() { return id; }
 
-	public Usuario getCiudadano() {
-		return ciudadano;
-	}
+    public void setId(Long id) { this.id = id; }
 
-	public void setCiudadano(Usuario ciudadano) {
-		this.ciudadano = ciudadano;
-	}
+    public Usuario getCiudadano() { return ciudadano; }
 
-	public Usuario getRecolector() {
-		return recolector;
-	}
+    public void setCiudadano(Usuario ciudadano) { this.ciudadano = ciudadano; }
 
-	public void setRecolector(Usuario recolector) {
-		this.recolector = recolector;
-	}
+    public Usuario getRecolector() { return recolector; }
 
-	public PuntoVerde getPuntoVerde() {
-		return puntoVerde;
-	}
+    public void setRecolector(Usuario recolector) { this.recolector = recolector; }
 
-	public void setPuntoVerde(PuntoVerde puntoVerde) {
-		this.puntoVerde = puntoVerde;
-	}
+    public PuntoVerde getPuntoVerde() { return puntoVerde; }
 
-	public Campania getCampania() {
-		return campania;
-	}
+    public void setPuntoVerde(PuntoVerde puntoVerde) { this.puntoVerde = puntoVerde; }
 
-	public void setCampania(Campania campania) {
-		this.campania = campania;
-	}
+    public Campania getCampania() { return campania; }
 
-	public String getMaterial() {
-		return material;
-	}
+    public void setCampania(Campania campania) { this.campania = campania; }
 
-	public void setMaterial(String material) {
-		this.material = material;
-	}
+    public String getMaterial() { return material; }
 
-	public Double getCantidad() {
-		return cantidad;
-	}
+    public void setMaterial(String material) { this.material = material; }
 
-	public void setCantidad(Double cantidad) {
-		this.cantidad = cantidad;
-	}
+    public Double getCantidad() { return cantidad; }
 
-	public String getUnidad() {
-		return unidad;
-	}
+    public void setCantidad(Double cantidad) { this.cantidad = cantidad; }
 
-	public void setUnidad(String unidad) {
-		this.unidad = unidad;
-	}
+    public String getUnidad() { return unidad; }
 
-	public LocalDateTime getFechaEntrega() {
-		return fechaEntrega;
-	}
+    public void setUnidad(String unidad) { this.unidad = unidad; }
 
-	public void setFechaEntrega(LocalDateTime fechaEntrega) {
-		this.fechaEntrega = fechaEntrega;
-	}
+    public LocalDateTime getFechaEntrega() { return fechaEntrega; }
 
-	public boolean isValidada() {
-		return validada;
-	}
+    public void setFechaEntrega(LocalDateTime fechaEntrega) { this.fechaEntrega = fechaEntrega; }
 
-	public void setValidada(boolean validada) {
-		this.validada = validada;
-	}
+    public boolean isValidada() { return validada; }
 
-	public LocalDateTime getFechaValidacion() {
-		return fechaValidacion;
-	}
+    public void setValidada(boolean validada) { this.validada = validada; }
 
-	public void setFechaValidacion(LocalDateTime fechaValidacion) {
-		this.fechaValidacion = fechaValidacion;
-	}
+    public LocalDateTime getFechaValidacion() { return fechaValidacion; }
 
-	public String getObservaciones() {
-		return observaciones;
-	}
+    public void setFechaValidacion(LocalDateTime fechaValidacion) { this.fechaValidacion = fechaValidacion; }
 
-	public void setObservaciones(String observaciones) {
-		this.observaciones = observaciones;
-	}
+    public String getObservaciones() { return observaciones; }
 
-	public int getPuntosGanados() {
-		return puntosGanados;
-	}
+    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
-	public void setPuntosGanados(int puntosGanados) {
-		this.puntosGanados = puntosGanados;
-	}
+    public int getPuntosGanados() { return puntosGanados; }
 
-	public List<String> getEvidencias() {
-		return evidencias;
-	}
+    public void setPuntosGanados(int puntosGanados) { this.puntosGanados = puntosGanados; }
 
-	public void setEvidencias(List<String> evidencias) {
-		this.evidencias = evidencias;
-	}
+    public List<String> getEvidencias() { return evidencias; }
 
-	public String getRespuestaAdmin() {
-		return respuestaAdmin;
-	}
+    public void setEvidencias(List<String> evidencias) { this.evidencias = evidencias; }
 
-	public void setRespuestaAdmin(String respuestaAdmin) {
-		this.respuestaAdmin = respuestaAdmin;
-	}
+    public String getRespuestaAdmin() { return respuestaAdmin; }
+
+    public void setRespuestaAdmin(String respuestaAdmin) { this.respuestaAdmin = respuestaAdmin; }
+
+    public String getValidadoPor() { return validadoPor; }
+
+    public void setValidadoPor(String validadoPor) { this.validadoPor = validadoPor; }
 }

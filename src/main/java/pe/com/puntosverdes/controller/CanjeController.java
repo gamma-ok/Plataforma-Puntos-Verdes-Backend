@@ -116,4 +116,15 @@ public class CanjeController {
         Canje canje = canjeService.obtenerPorId(id);
         return canje != null ? ResponseEntity.ok(canje) : ResponseEntity.notFound().build();
     }
+    
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Canje>> buscarCanjes(
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String fechaInicio,
+            @RequestParam(required = false) String fechaFin,
+            @RequestParam(required = false) Long usuarioId) {
+
+        List<Canje> resultados = canjeService.buscarCanjes(estado, fechaInicio, fechaFin, usuarioId);
+        return ResponseEntity.ok(resultados);
+    }
 }

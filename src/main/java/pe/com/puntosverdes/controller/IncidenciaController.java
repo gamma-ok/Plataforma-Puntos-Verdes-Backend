@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @RestController
-@RequestMapping("/incidencias")
+@RequestMapping("/api/incidencias")
 @CrossOrigin("*")
 public class IncidenciaController {
 

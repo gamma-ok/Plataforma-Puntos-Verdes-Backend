@@ -15,7 +15,7 @@ import pe.com.puntosverdes.service.UsuarioService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/puntos-verdes")
+@RequestMapping("/api/puntos-verdes")
 @CrossOrigin("*")
 public class PuntoVerdeController {
 

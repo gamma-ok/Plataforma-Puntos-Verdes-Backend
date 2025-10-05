@@ -1,6 +1,8 @@
 package pe.com.puntosverdes.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import pe.com.puntosverdes.dto.EntregaHistorialDTO;
 import pe.com.puntosverdes.dto.EntregaValidadaDTO;
@@ -48,6 +50,7 @@ public class EntregaServiceImpl implements EntregaService {
     @Override
     public EntregaValidadaDTO validarEntrega(Long entregaId, boolean validada, int puntosGanados,
                                              String respuestaAdmin, String observaciones, Long recolectorId) {
+
         Entrega entrega = entregaRepository.findById(entregaId)
                 .orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
 
@@ -56,23 +59,29 @@ public class EntregaServiceImpl implements EntregaService {
         entrega.setRespuestaAdmin(respuestaAdmin);
         entrega.setObservaciones(observaciones);
 
+        // 🔐 Registrar quién validó (admin, municipalidad o recolector autenticado)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String validadoPor = (auth != null) ? auth.getName() : "Sistema";
+        entrega.setValidadoPor(validadoPor);
+
         if (recolectorId != null) {
             Usuario recolector = usuarioRepository.findById(recolectorId)
                     .orElseThrow(() -> new EntregaNotFoundException("Recolector no encontrado"));
             entrega.setRecolector(recolector);
         }
 
+        // ✅ Si la entrega es válida, otorgar puntos
         if (validada && puntosGanados > 0) {
             Usuario ciudadano = entrega.getCiudadano();
             int totalPuntos = puntosGanados;
 
-            // 🔥 Si la entrega pertenece a una campaña activa, sumar puntos extra
+            // Si pertenece a una campaña activa, sumar puntos extra
             if (entrega.getCampania() != null && entrega.getCampania().isActiva()) {
                 totalPuntos += entrega.getCampania().getPuntosExtra();
             }
 
             ciudadano.setPuntosAcumulados(ciudadano.getPuntosAcumulados() + totalPuntos);
-            entrega.setPuntosGanados(totalPuntos); // Se guarda el total de puntos ganados
+            entrega.setPuntosGanados(totalPuntos);
             usuarioRepository.save(ciudadano);
         }
 
@@ -85,7 +94,7 @@ public class EntregaServiceImpl implements EntregaService {
                     .iterator().next().getRol().getRolNombre();
         }
 
-        // Convertimos a DTO incluyendo el rol
+        // Convertimos a DTO con el nuevo campo validadoPor
         return new EntregaValidadaDTO(
                 actualizada.getId(),
                 actualizada.getMaterial(),
@@ -97,7 +106,8 @@ public class EntregaServiceImpl implements EntregaService {
                 actualizada.getFechaValidacion(),
                 actualizada.getCiudadano() != null ? actualizada.getCiudadano().getUsername() : null,
                 actualizada.getPuntoVerde() != null ? actualizada.getPuntoVerde().getDireccion() : null,
-                rolUsuario
+                rolUsuario,
+                actualizada.getValidadoPor()
         );
     }
 

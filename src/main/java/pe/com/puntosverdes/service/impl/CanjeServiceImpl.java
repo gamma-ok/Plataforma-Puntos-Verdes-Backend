@@ -11,6 +11,7 @@ import pe.com.puntosverdes.repository.RecompensaRepository;
 import pe.com.puntosverdes.repository.UsuarioRepository;
 import pe.com.puntosverdes.service.CanjeService;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -28,14 +29,12 @@ public class CanjeServiceImpl implements CanjeService {
     @Override
     @Transactional
     public Canje crearCanje(Usuario usuario, Recompensa recompensa) {
-        // Asumimos que el controller ya verificó existencia y puntos, pero guardamos puntosUsados aquí
         Canje canje = new Canje();
         canje.setUsuario(usuario);
         canje.setRecompensa(recompensa);
         canje.setFechaSolicitud(LocalDateTime.now());
         canje.setEstado("PENDIENTE");
         canje.setPuntosUsados(recompensa.getPuntosNecesarios());
-
         return canjeRepository.save(canje);
     }
 
@@ -88,5 +87,38 @@ public class CanjeServiceImpl implements CanjeService {
     @Override
     public List<Canje> listarPorUsuario(Long usuarioId) {
         return canjeRepository.findByUsuarioId(usuarioId);
+    }
+
+    // 🔍 Implementación flexible del filtro
+    @Override
+    public List<Canje> buscarCanjes(String estado, String fechaInicio, String fechaFin, Long usuarioId) {
+        // Si todos los parámetros son nulos, retornar todos los canjes
+        if (estado == null && fechaInicio == null && fechaFin == null && usuarioId == null) {
+            return canjeRepository.findAll();
+        }
+
+        // Formato de fechas esperado: "yyyy-MM-ddTHH:mm:ss" o solo "yyyy-MM-dd"
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd['T'HH:mm[:ss]]");
+
+        if (usuarioId != null && estado != null) {
+            return canjeRepository.findByUsuarioIdAndEstado(usuarioId, estado);
+        }
+
+        if (estado != null) {
+            return canjeRepository.findByEstado(estado);
+        }
+
+        if (fechaInicio != null && fechaFin != null) {
+            LocalDateTime inicio = LocalDateTime.parse(fechaInicio, formatter);
+            LocalDateTime fin = LocalDateTime.parse(fechaFin, formatter);
+            return canjeRepository.findByFechaSolicitudBetween(inicio, fin);
+        }
+
+        if (usuarioId != null) {
+            return canjeRepository.findByUsuarioId(usuarioId);
+        }
+
+        // Si no se cumple ningún filtro específico, devolvemos todo
+        return canjeRepository.findAll();
     }
 }

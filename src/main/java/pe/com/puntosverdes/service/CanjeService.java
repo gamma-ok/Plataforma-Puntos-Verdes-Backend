@@ -12,4 +12,5 @@ public interface CanjeService {
     Canje obtenerPorId(Long id);
     List<Canje> listarCanjes();
     List<Canje> listarPorUsuario(Long usuarioId);
+    List<Canje> buscarCanjes(String estado, String fechaInicio, String fechaFin, Long usuarioId);
 }
