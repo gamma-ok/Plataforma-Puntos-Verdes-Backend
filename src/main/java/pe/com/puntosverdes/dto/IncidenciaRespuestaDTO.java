@@ -29,7 +29,6 @@ public class IncidenciaRespuestaDTO {
 		this.rolUsuarioReporte = rolUsuarioReporte;
 	}
 
-	// Getters y setters
 	public Long getId() {
 		return id;
 	}

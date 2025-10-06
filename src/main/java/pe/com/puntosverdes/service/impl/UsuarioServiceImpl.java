@@ -12,7 +12,6 @@ import pe.com.puntosverdes.model.UsuarioRol;
 import pe.com.puntosverdes.repository.RolRepository;
 import pe.com.puntosverdes.repository.UsuarioRepository;
 import pe.com.puntosverdes.service.UsuarioService;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,165 +20,159 @@ import java.util.stream.Collectors;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private RolRepository rolRepository;
+	@Autowired
+	private RolRepository rolRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-    @Override
-    public Usuario crearUsuario(Usuario usuario) {
-        if (usuarioRepository.findByUsername(usuario.getUsername()) != null) {
-            throw new UsuarioFoundException("El usuario con username " + usuario.getUsername() + " ya existe.");
-        }
+	@Override
+	public Usuario crearUsuario(Usuario usuario) {
+		if (usuarioRepository.findByUsername(usuario.getUsername()) != null) {
+			throw new UsuarioFoundException("El usuario con username " + usuario.getUsername() + " ya existe.");
+		}
 
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+		usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
-        Rol rolCiudadano = rolRepository.findByRolNombre("CIUDADANO");
-        if (rolCiudadano == null) {
-            rolCiudadano = new Rol();
-            rolCiudadano.setRolNombre("CIUDADANO");
-            rolRepository.save(rolCiudadano);
-        }
+		Rol rolCiudadano = rolRepository.findByRolNombre("CIUDADANO");
+		if (rolCiudadano == null) {
+			rolCiudadano = new Rol();
+			rolCiudadano.setRolNombre("CIUDADANO");
+			rolRepository.save(rolCiudadano);
+		}
 
-        UsuarioRol usuarioRol = new UsuarioRol(usuario, rolCiudadano);
-        if (usuario.getUsuarioRoles() == null) {
-            usuario.setUsuarioRoles(new HashSet<>());
-        }
-        usuario.getUsuarioRoles().add(usuarioRol);
+		UsuarioRol usuarioRol = new UsuarioRol(usuario, rolCiudadano);
+		if (usuario.getUsuarioRoles() == null) {
+			usuario.setUsuarioRoles(new HashSet<>());
+		}
+		usuario.getUsuarioRoles().add(usuarioRol);
 
-        return usuarioRepository.save(usuario);
-    }
+		return usuarioRepository.save(usuario);
+	}
 
-    @Override
-    public Usuario obtenerUsuarioPorId(Long id) {
-        return usuarioRepository.findById(id)
-                .orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
-    }
+	@Override
+	public Usuario obtenerUsuarioPorId(Long id) {
+		return usuarioRepository.findById(id)
+				.orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
+	}
 
-    @Override
-    public Usuario obtenerUsuarioPorUsername(String username) {
-        Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) throw new UsuarioNotFoundException("Usuario no encontrado con username: " + username);
-        return usuario;
-    }
-    
-    @Override
-    public Usuario obtenerUsuarioPorEmail(String email) {
-        return usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con email: " + email));
-    }
+	@Override
+	public Usuario obtenerUsuarioPorUsername(String username) {
+		Usuario usuario = usuarioRepository.findByUsername(username);
+		if (usuario == null)
+			throw new UsuarioNotFoundException("Usuario no encontrado con username: " + username);
+		return usuario;
+	}
 
-    @Override
-    public List<Usuario> obtenerUsuariosPorCelular(String celular) {
-        return usuarioRepository.findByCelular(celular);
-    }
+	@Override
+	public Usuario obtenerUsuarioPorEmail(String email) {
+		return usuarioRepository.findByEmail(email)
+				.orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con email: " + email));
+	}
 
-    @Override
-    public List<Usuario> listarUsuarios() {
-        return usuarioRepository.findAll();
-    }
+	@Override
+	public List<Usuario> obtenerUsuariosPorCelular(String celular) {
+		return usuarioRepository.findByCelular(celular);
+	}
 
-    @Override
-    public List<Usuario> obtenerRankingUsuarios() {
-        return usuarioRepository.findAllByOrderByPuntosAcumuladosDesc();
-    }
-    
-    @Override
-    public void eliminarUsuario(Long id) {
-        if (!usuarioRepository.existsById(id)) {
-            throw new UsuarioNotFoundException("Usuario no encontrado con id: " + id);
-        }
-        usuarioRepository.deleteById(id);
-    }
+	@Override
+	public List<Usuario> listarUsuarios() {
+		return usuarioRepository.findAll();
+	}
 
-    @Override
-    public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
-        return usuarioRepository.findById(id).map(usuario -> {
-            if (usuarioActualizado.getNombre() != null) usuario.setNombre(usuarioActualizado.getNombre());
-            if (usuarioActualizado.getApellido() != null) usuario.setApellido(usuarioActualizado.getApellido());
-            if (usuarioActualizado.getEmail() != null) usuario.setEmail(usuarioActualizado.getEmail());
-            if (usuarioActualizado.getCelular() != null) usuario.setCelular(usuarioActualizado.getCelular());
-            return usuarioRepository.save(usuario);
-        }).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
-    }
+	@Override
+	public List<Usuario> obtenerRankingUsuarios() {
+		return usuarioRepository.findAllByOrderByPuntosAcumuladosDesc();
+	}
 
-    @Override
-    public Usuario cambiarContrasena(Long id, String nuevaContrasena) {
-        return usuarioRepository.findById(id).map(usuario -> {
-            usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
-            return usuarioRepository.save(usuario);
-        }).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
-    }
+	@Override
+	public void eliminarUsuario(Long id) {
+		if (!usuarioRepository.existsById(id)) {
+			throw new UsuarioNotFoundException("Usuario no encontrado con id: " + id);
+		}
+		usuarioRepository.deleteById(id);
+	}
 
-    @Override
-    public Usuario habilitarUsuario(Long id) {
-        return usuarioRepository.findById(id).map(usuario -> {
-            usuario.setEnabled(true);
-            return usuarioRepository.save(usuario);
-        }).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
-    }
+	@Override
+	public Usuario actualizarUsuario(Long id, Usuario usuarioActualizado) {
+		return usuarioRepository.findById(id).map(usuario -> {
+			if (usuarioActualizado.getNombre() != null)
+				usuario.setNombre(usuarioActualizado.getNombre());
+			if (usuarioActualizado.getApellido() != null)
+				usuario.setApellido(usuarioActualizado.getApellido());
+			if (usuarioActualizado.getEmail() != null)
+				usuario.setEmail(usuarioActualizado.getEmail());
+			if (usuarioActualizado.getCelular() != null)
+				usuario.setCelular(usuarioActualizado.getCelular());
+			return usuarioRepository.save(usuario);
+		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
+	}
 
-    @Override
-    public Usuario deshabilitarUsuario(Long id) {
-        return usuarioRepository.findById(id).map(usuario -> {
-            usuario.setEnabled(false);
-            return usuarioRepository.save(usuario);
-        }).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
-    }
+	@Override
+	public Usuario cambiarContrasena(Long id, String nuevaContrasena) {
+		return usuarioRepository.findById(id).map(usuario -> {
+			usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
+			return usuarioRepository.save(usuario);
+		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
+	}
 
-    @Override
-    public List<Usuario> listarUsuariosPorRol(String rolNombre) {
-        return usuarioRepository.findByUsuarioRoles_Rol_RolNombre(rolNombre);
-    }
+	@Override
+	public Usuario habilitarUsuario(Long id) {
+		return usuarioRepository.findById(id).map(usuario -> {
+			usuario.setEnabled(true);
+			return usuarioRepository.save(usuario);
+		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
+	}
 
-    @Override
-    public Usuario actualizarPerfil(Long id, String perfilUrl) {
-        return usuarioRepository.findById(id).map(usuario -> {
-            usuario.setPerfil(perfilUrl);
-            return usuarioRepository.save(usuario);
-        }).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
-    }
+	@Override
+	public Usuario deshabilitarUsuario(Long id) {
+		return usuarioRepository.findById(id).map(usuario -> {
+			usuario.setEnabled(false);
+			return usuarioRepository.save(usuario);
+		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
+	}
 
-    @Override
-    public UsuarioDTO convertirADTO(Usuario usuario) {
-        Set<String> roles = usuario.getUsuarioRoles().stream()
-                .map(ur -> ur.getRol().getRolNombre())
-                .collect(Collectors.toSet());
+	@Override
+	public List<Usuario> listarUsuariosPorRol(String rolNombre) {
+		return usuarioRepository.findByUsuarioRoles_Rol_RolNombre(rolNombre);
+	}
 
-        return new UsuarioDTO(
-                usuario.getId(),
-                usuario.getUsername(),
-                usuario.getNombre(),
-                usuario.getApellido(),
-                usuario.getEmail(),
-                usuario.getCelular(),
-                usuario.isEnabled(),
-                roles
-        );
-    }
-    
-    @Override
-    public Usuario asignarRol(Long idUsuario, String nuevoRol) {
-        return usuarioRepository.findById(idUsuario).map(usuario -> {
-            Rol rol = rolRepository.findByRolNombre(nuevoRol.toUpperCase());
-            if (rol == null) {
-                rol = new Rol();
-                rol.setRolNombre(nuevoRol.toUpperCase());
-                rolRepository.save(rol);
-            }
+	@Override
+	public Usuario actualizarPerfil(Long id, String perfilUrl) {
+		return usuarioRepository.findById(id).map(usuario -> {
+			usuario.setPerfil(perfilUrl);
+			return usuarioRepository.save(usuario);
+		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
+	}
 
-            // 🔥 limpiar roles actuales
-            usuario.getUsuarioRoles().clear();
+	@Override
+	public UsuarioDTO convertirADTO(Usuario usuario) {
+		Set<String> roles = usuario.getUsuarioRoles().stream().map(ur -> ur.getRol().getRolNombre())
+				.collect(Collectors.toSet());
 
-            // asignar solo el nuevo rol
-            UsuarioRol usuarioRol = new UsuarioRol(usuario, rol);
-            usuario.getUsuarioRoles().add(usuarioRol);
+		return new UsuarioDTO(usuario.getId(), usuario.getUsername(), usuario.getNombre(), usuario.getApellido(),
+				usuario.getEmail(), usuario.getCelular(), usuario.isEnabled(), roles);
+	}
 
-            return usuarioRepository.save(usuario);
-        }).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + idUsuario));
-    }
+	@Override
+	public Usuario asignarRol(Long idUsuario, String nuevoRol) {
+		return usuarioRepository.findById(idUsuario).map(usuario -> {
+			Rol rol = rolRepository.findByRolNombre(nuevoRol.toUpperCase());
+			if (rol == null) {
+				rol = new Rol();
+				rol.setRolNombre(nuevoRol.toUpperCase());
+				rolRepository.save(rol);
+			}
+
+			usuario.getUsuarioRoles().clear();
+
+			UsuarioRol usuarioRol = new UsuarioRol(usuario, rol);
+			usuario.getUsuarioRoles().add(usuarioRol);
+
+			return usuarioRepository.save(usuario);
+		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + idUsuario));
+	}
 }

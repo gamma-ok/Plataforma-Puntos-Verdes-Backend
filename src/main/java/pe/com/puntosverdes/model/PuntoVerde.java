@@ -2,7 +2,6 @@ package pe.com.puntosverdes.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,13 +23,11 @@ public class PuntoVerde {
 
 	private LocalDateTime fechaRegistro = LocalDateTime.now();
 
-	// Usuario creador (admin o municipalidad)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creado_por_id")
 	@JsonIgnoreProperties({ "usuarioRoles" })
 	private Usuario creadoPor;
 
-	// Relación con entregas
 	@OneToMany(mappedBy = "puntoVerde", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties({ "puntoVerde" })
 	private Set<Entrega> entregas = new HashSet<>();
@@ -48,7 +45,6 @@ public class PuntoVerde {
 		this.fechaRegistro = LocalDateTime.now();
 	}
 
-	// Getters & Setters
 	public Long getId() {
 		return id;
 	}

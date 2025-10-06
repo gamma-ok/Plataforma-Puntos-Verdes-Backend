@@ -6,6 +6,5 @@ import pe.com.puntosverdes.model.Rol;
 
 @Repository
 public interface RolRepository extends JpaRepository<Rol, Long> {
-	
     Rol findByRolNombre(String rolNombre);
 }

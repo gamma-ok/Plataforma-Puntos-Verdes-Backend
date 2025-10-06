@@ -24,7 +24,6 @@ public class UsuarioDTO {
 		this.roles = roles;
 	}
 
-	// Getters & Setters
 	public Long getId() {
 		return id;
 	}

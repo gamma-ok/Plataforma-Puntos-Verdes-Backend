@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import pe.com.puntosverdes.model.Recompensa;
 import pe.com.puntosverdes.repository.RecompensaRepository;
 import pe.com.puntosverdes.service.RecompensaService;
-
 import java.util.List;
 
 @Service

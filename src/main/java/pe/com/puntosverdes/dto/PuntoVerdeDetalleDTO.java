@@ -16,7 +16,6 @@ public class PuntoVerdeDetalleDTO {
 	public PuntoVerdeDetalleDTO() {
 	}
 
-	// Getters y setters
 	public Long getId() {
 		return id;
 	}

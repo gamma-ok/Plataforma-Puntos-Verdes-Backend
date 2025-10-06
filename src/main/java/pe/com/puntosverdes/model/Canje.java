@@ -12,38 +12,29 @@ public class Canje {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// Usuario que solicita el canje
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "usuario_id", nullable = false)
 	@JsonIgnoreProperties({ "usuarioRoles" })
 	private Usuario usuario;
 
-	// Recompensa que desea canjear
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "recompensa_id", nullable = false)
 	private Recompensa recompensa;
 
-	// Fecha de solicitud
 	private LocalDateTime fechaSolicitud = LocalDateTime.now();
 
-	// Fecha en que el admin aprueba/rechaza el canje
 	private LocalDateTime fechaResolucion;
 
-	// Puntos que el usuario usa para este canje
 	private int puntosUsados;
 
-	// Estado del canje: PENDIENTE, APROBADO o RECHAZADO
 	private String estado = "PENDIENTE";
 
-	// Comentario o respuesta del admin/municipalidad
 	@Column(length = 1000)
 	private String respuestaAdmin;
 
-	// Motivo del rechazo (opcional, solo si fue RECHAZADO)
 	@Column(length = 1000)
 	private String motivoRechazo;
 
-	// Quién resolvió (admin o municipalidad)
 	private String resueltoPor;
 
 	public Canje() {
@@ -57,7 +48,6 @@ public class Canje {
 		this.estado = "PENDIENTE";
 	}
 
-	// --- Getters y Setters ---
 	public Long getId() {
 		return id;
 	}

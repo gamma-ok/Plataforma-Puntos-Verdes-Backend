@@ -11,32 +11,28 @@ import pe.com.puntosverdes.repository.*;
 @CrossOrigin("*")
 public class DashboardController {
 
-    @Autowired
-    private EntregaRepository entregaRepository;
+	@Autowired
+	private EntregaRepository entregaRepository;
 
-    @Autowired
-    private CanjeRepository canjeRepository;
+	@Autowired
+	private CanjeRepository canjeRepository;
 
-    @Autowired
-    private CampaniaRepository campaniaRepository;
+	@Autowired
+	private CampaniaRepository campaniaRepository;
 
-    @Autowired
-    private RecompensaRepository recompensaRepository;
+	@Autowired
+	private RecompensaRepository recompensaRepository;
 
-    @GetMapping("/resumen")
-    public ResponseEntity<DashboardResumenDTO> obtenerResumen() {
-        long totalEntregasValidadas = entregaRepository.countByValidadaTrue();
-        long totalCanjesAprobados = canjeRepository.countByEstado("APROBADO");
-        long totalCampaniasActivas = campaniaRepository.countByActivaTrue();
-        long totalRecompensasActivas = recompensaRepository.countByActivoTrue();
+	@GetMapping("/resumen")
+	public ResponseEntity<DashboardResumenDTO> obtenerResumen() {
+		long totalEntregasValidadas = entregaRepository.countByValidadaTrue();
+		long totalCanjesAprobados = canjeRepository.countByEstado("APROBADO");
+		long totalCampaniasActivas = campaniaRepository.countByActivaTrue();
+		long totalRecompensasActivas = recompensaRepository.countByActivoTrue();
 
-        DashboardResumenDTO resumen = new DashboardResumenDTO(
-                totalEntregasValidadas,
-                totalCanjesAprobados,
-                totalCampaniasActivas,
-                totalRecompensasActivas
-        );
+		DashboardResumenDTO resumen = new DashboardResumenDTO(totalEntregasValidadas, totalCanjesAprobados,
+				totalCampaniasActivas, totalRecompensasActivas);
 
-        return ResponseEntity.ok(resumen);
-    }
+		return ResponseEntity.ok(resumen);
+	}
 }

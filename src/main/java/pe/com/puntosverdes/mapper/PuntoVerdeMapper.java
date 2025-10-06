@@ -3,7 +3,6 @@ package pe.com.puntosverdes.mapper;
 import pe.com.puntosverdes.dto.PuntoVerdeDTO;
 import pe.com.puntosverdes.dto.PuntoVerdeDetalleDTO;
 import pe.com.puntosverdes.model.PuntoVerde;
-
 import java.util.List;
 import java.util.stream.Collectors;
 

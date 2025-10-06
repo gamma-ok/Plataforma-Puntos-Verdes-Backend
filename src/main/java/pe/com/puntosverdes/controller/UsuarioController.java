@@ -19,192 +19,166 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 public class UsuarioController {
 
-    @Autowired
-    private UsuarioService usuarioService;
+	@Autowired
+	private UsuarioService usuarioService;
 
-    // Registrar usuario
-    @PostMapping("/registrar")
-    public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
-        usuario.setPerfil("default.png");
-        Usuario creado = usuarioService.crearUsuario(usuario);
-        return ResponseEntity.ok(usuarioService.convertirADTO(creado));
-    }
+	// Registrar usuario
+	@PostMapping("/registrar")
+	public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
+		usuario.setPerfil("default.png");
+		Usuario creado = usuarioService.crearUsuario(usuario);
+		return ResponseEntity.ok(usuarioService.convertirADTO(creado));
+	}
 
-    // Listar todos
-    @GetMapping
-    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
-        return ResponseEntity.ok(
-                usuarioService.listarUsuarios().stream()
-                        .map(usuarioService::convertirADTO)
-                        .collect(Collectors.toList())
-        );
-    }
+	// Listar todos
+	@GetMapping("/")
+	public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
+		return ResponseEntity.ok(usuarioService.listarUsuarios().stream().map(usuarioService::convertirADTO)
+				.collect(Collectors.toList()));
+	}
 
-    @GetMapping("/ranking")
-    public ResponseEntity<List<Usuario>> obtenerRanking() {
-        return ResponseEntity.ok(usuarioService.obtenerRankingUsuarios());
-    }
-    
-    // Obtener por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> obtenerUsuario(@PathVariable Long id) {
-        Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
-        return usuario != null ? ResponseEntity.ok(usuarioService.convertirADTO(usuario))
-                : ResponseEntity.notFound().build();
-    }
+	@GetMapping("/ranking")
+	public ResponseEntity<List<Usuario>> obtenerRanking() {
+		return ResponseEntity.ok(usuarioService.obtenerRankingUsuarios());
+	}
 
-    // Obtener por username
-    @GetMapping("/username/{username}")
-    public ResponseEntity<UsuarioDTO> obtenerUsuarioPorUsername(@PathVariable String username) {
-        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
-        return usuario != null ? ResponseEntity.ok(usuarioService.convertirADTO(usuario))
-                : ResponseEntity.notFound().build();
-    }
-    
-    // Buscar por email
-    @GetMapping("/email/{email}")
-    public ResponseEntity<Usuario> obtenerUsuarioPorEmail(@PathVariable String email) {
-        Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
-        return ResponseEntity.ok(usuario);
-    }
+	// Obtener por ID
+	@GetMapping("/{id}")
+	public ResponseEntity<UsuarioDTO> obtenerUsuario(@PathVariable Long id) {
+		Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
+		return usuario != null ? ResponseEntity.ok(usuarioService.convertirADTO(usuario))
+				: ResponseEntity.notFound().build();
+	}
 
-    // Buscar por celular
-    @GetMapping("/celular/{celular}")
-    public ResponseEntity<List<Usuario>> obtenerUsuariosPorCelular(@PathVariable String celular) {
-        return ResponseEntity.ok(usuarioService.obtenerUsuariosPorCelular(celular));
-    }
+	// Obtener por username
+	@GetMapping("/username/{username}")
+	public ResponseEntity<UsuarioDTO> obtenerUsuarioPorUsername(@PathVariable String username) {
+		Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
+		return usuario != null ? ResponseEntity.ok(usuarioService.convertirADTO(usuario))
+				: ResponseEntity.notFound().build();
+	}
 
-    // Actualizar usuario (ADMIN)
-    @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
-        Usuario actualizado = usuarioService.actualizarUsuario(id, usuario);
-        return actualizado != null ? ResponseEntity.ok(usuarioService.convertirADTO(actualizado))
-                : ResponseEntity.notFound().build();
-    }
+	// Buscar por email
+	@GetMapping("/email/{email}")
+	public ResponseEntity<Usuario> obtenerUsuarioPorEmail(@PathVariable String email) {
+		Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
+		return ResponseEntity.ok(usuario);
+	}
 
-    // Cambiar contraseña
-    @PutMapping("/{id}/cambiar-password")
-    public ResponseEntity<UsuarioDTO> cambiarContrasena(@PathVariable Long id, @RequestBody CambioPasswordDTO request) {
-        Usuario actualizado = usuarioService.cambiarContrasena(id, request.getNuevaContrasena());
-        return actualizado != null ? ResponseEntity.ok(usuarioService.convertirADTO(actualizado))
-                : ResponseEntity.notFound().build();
-    }
+	// Buscar por celular
+	@GetMapping("/celular/{celular}")
+	public ResponseEntity<List<Usuario>> obtenerUsuariosPorCelular(@PathVariable String celular) {
+		return ResponseEntity.ok(usuarioService.obtenerUsuariosPorCelular(celular));
+	}
 
-    // Habilitar usuario
-    @PutMapping("/{id}/habilitar")
-    public ResponseEntity<UsuarioDTO> habilitarUsuario(@PathVariable Long id) {
-        Usuario actualizado = usuarioService.habilitarUsuario(id);
-        return actualizado != null ? ResponseEntity.ok(usuarioService.convertirADTO(actualizado))
-                : ResponseEntity.notFound().build();
-    }
+	// Actualizar usuario (ADMIN)
+	@PutMapping("/{id}")
+	public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
+		Usuario actualizado = usuarioService.actualizarUsuario(id, usuario);
+		return actualizado != null ? ResponseEntity.ok(usuarioService.convertirADTO(actualizado))
+				: ResponseEntity.notFound().build();
+	}
 
-    // Deshabilitar usuario
-    @PutMapping("/{id}/deshabilitar")
-    public ResponseEntity<UsuarioDTO> deshabilitarUsuario(@PathVariable Long id) {
-        Usuario actualizado = usuarioService.deshabilitarUsuario(id);
-        return actualizado != null ? ResponseEntity.ok(usuarioService.convertirADTO(actualizado))
-                : ResponseEntity.notFound().build();
-    }
+	// Cambiar contraseña
+	@PutMapping("/{id}/cambiar-password")
+	public ResponseEntity<UsuarioDTO> cambiarContrasena(@PathVariable Long id, @RequestBody CambioPasswordDTO request) {
+		Usuario actualizado = usuarioService.cambiarContrasena(id, request.getNuevaContrasena());
+		return actualizado != null ? ResponseEntity.ok(usuarioService.convertirADTO(actualizado))
+				: ResponseEntity.notFound().build();
+	}
 
-    // Eliminar por ID
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
-        usuarioService.eliminarUsuario(id);
-        return ResponseEntity.noContent().build();
-    }
+	// Habilitar usuario
+	@PutMapping("/{id}/habilitar")
+	public ResponseEntity<UsuarioDTO> habilitarUsuario(@PathVariable Long id) {
+		Usuario actualizado = usuarioService.habilitarUsuario(id);
+		return actualizado != null ? ResponseEntity.ok(usuarioService.convertirADTO(actualizado))
+				: ResponseEntity.notFound().build();
+	}
 
-    // Listar usuarios por rol
-    @GetMapping("/rol/{rolNombre}")
-    public ResponseEntity<List<UsuarioDTO>> listarUsuariosPorRol(@PathVariable String rolNombre) {
-        return ResponseEntity.ok(
-                usuarioService.listarUsuariosPorRol(rolNombre).stream()
-                        .map(usuarioService::convertirADTO)
-                        .collect(Collectors.toList())
-        );
-    }
+	// Deshabilitar usuario
+	@PutMapping("/{id}/deshabilitar")
+	public ResponseEntity<UsuarioDTO> deshabilitarUsuario(@PathVariable Long id) {
+		Usuario actualizado = usuarioService.deshabilitarUsuario(id);
+		return actualizado != null ? ResponseEntity.ok(usuarioService.convertirADTO(actualizado))
+				: ResponseEntity.notFound().build();
+	}
 
-    // Actualizar perfil (foto)
-    @PutMapping("/{id}/perfil")
-    public ResponseEntity<UsuarioDTO> actualizarPerfil(
-            @PathVariable Long id,
-            @RequestParam("perfilUrl") String perfilUrl) {
-        Usuario usuario = usuarioService.actualizarPerfil(id, perfilUrl);
-        return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
-    }
+	// Eliminar por ID
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
+		usuarioService.eliminarUsuario(id);
+		return ResponseEntity.noContent().build();
+	}
 
-    // Obtener mi perfil
-    @GetMapping("/mi-perfil")
-    public ResponseEntity<UsuarioPerfilDTO> obtenerMiPerfil(Authentication authentication) {
-        String username = authentication.getName(); // viene del JWT
-        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
+	// Listar usuarios por rol
+	@GetMapping("/rol/{rolNombre}")
+	public ResponseEntity<List<UsuarioDTO>> listarUsuariosPorRol(@PathVariable String rolNombre) {
+		return ResponseEntity.ok(usuarioService.listarUsuariosPorRol(rolNombre).stream()
+				.map(usuarioService::convertirADTO).collect(Collectors.toList()));
+	}
 
-        if (usuario == null) {
-            return ResponseEntity.notFound().build();
-        }
+	// Actualizar perfil (foto)
+	@PutMapping("/{id}/perfil")
+	public ResponseEntity<UsuarioDTO> actualizarPerfil(@PathVariable Long id,
+			@RequestParam("perfilUrl") String perfilUrl) {
+		Usuario usuario = usuarioService.actualizarPerfil(id, perfilUrl);
+		return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
+	}
 
-        Set<String> roles = usuario.getUsuarioRoles().stream()
-                .map(ur -> ur.getRol().getRolNombre())
-                .collect(Collectors.toSet());
+	// Obtener mi perfil
+	@GetMapping("/mi-perfil")
+	public ResponseEntity<UsuarioPerfilDTO> obtenerMiPerfil(Authentication authentication) {
+		String username = authentication.getName(); // viene del JWT
+		Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
 
-        UsuarioPerfilDTO dto = new UsuarioPerfilDTO(
-                usuario.getUsername(),
-                usuario.getNombre(),
-                usuario.getApellido(),
-                usuario.getEmail(),
-                usuario.getCelular(),
-                usuario.getPerfil(),
-                roles,
-                usuario.getPuntosAcumulados(),
-                usuario.getFechaRegistro()
-        );
+		if (usuario == null) {
+			return ResponseEntity.notFound().build();
+		}
 
-        return ResponseEntity.ok(dto);
-    }
+		Set<String> roles = usuario.getUsuarioRoles().stream().map(ur -> ur.getRol().getRolNombre())
+				.collect(Collectors.toSet());
 
-    // Actualizar mi perfil
-    @PutMapping("/mi-perfil")
-    public ResponseEntity<UsuarioPerfilDTO> actualizarMiPerfil(
-            Authentication authentication,
-            @RequestBody UsuarioPerfilDTO perfilActualizado) {
-        String username = authentication.getName();
-        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
+		UsuarioPerfilDTO dto = new UsuarioPerfilDTO(usuario.getUsername(), usuario.getNombre(), usuario.getApellido(),
+				usuario.getEmail(), usuario.getCelular(), usuario.getPerfil(), roles, usuario.getPuntosAcumulados(),
+				usuario.getFechaRegistro());
 
-        if (usuario == null) {
-            return ResponseEntity.notFound().build();
-        }
+		return ResponseEntity.ok(dto);
+	}
 
-        usuario.setNombre(perfilActualizado.getNombre());
-        usuario.setApellido(perfilActualizado.getApellido());
-        usuario.setEmail(perfilActualizado.getEmail());
-        usuario.setCelular(perfilActualizado.getCelular());
-        usuario.setPerfil(perfilActualizado.getPerfil());
+	// Actualizar mi perfil
+	@PutMapping("/mi-perfil")
+	public ResponseEntity<UsuarioPerfilDTO> actualizarMiPerfil(Authentication authentication,
+			@RequestBody UsuarioPerfilDTO perfilActualizado) {
+		String username = authentication.getName();
+		Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
 
-        Usuario actualizado = usuarioService.actualizarUsuario(usuario.getId(), usuario);
+		if (usuario == null) {
+			return ResponseEntity.notFound().build();
+		}
 
-        Set<String> roles = actualizado.getUsuarioRoles().stream()
-                .map(ur -> ur.getRol().getRolNombre())
-                .collect(Collectors.toSet());
+		usuario.setNombre(perfilActualizado.getNombre());
+		usuario.setApellido(perfilActualizado.getApellido());
+		usuario.setEmail(perfilActualizado.getEmail());
+		usuario.setCelular(perfilActualizado.getCelular());
+		usuario.setPerfil(perfilActualizado.getPerfil());
 
-        UsuarioPerfilDTO dto = new UsuarioPerfilDTO(
-                actualizado.getUsername(),
-                actualizado.getNombre(),
-                actualizado.getApellido(),
-                actualizado.getEmail(),
-                actualizado.getCelular(),
-                actualizado.getPerfil(),
-                roles,
-                actualizado.getPuntosAcumulados(),
-                actualizado.getFechaRegistro()
-        );
+		Usuario actualizado = usuarioService.actualizarUsuario(usuario.getId(), usuario);
 
-        return ResponseEntity.ok(dto);
-    }
-    
-    // Asignar rol (solo ADMIN debería acceder a este endpoint)
-    @PutMapping("/{id}/asignar-rol")
-    public ResponseEntity<?> asignarRol(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String rol = body.get("rolNombre");
-        usuarioService.asignarRol(id, rol);
-        return ResponseEntity.ok("Rol asignado correctamente");
-    }
+		Set<String> roles = actualizado.getUsuarioRoles().stream().map(ur -> ur.getRol().getRolNombre())
+				.collect(Collectors.toSet());
+
+		UsuarioPerfilDTO dto = new UsuarioPerfilDTO(actualizado.getUsername(), actualizado.getNombre(),
+				actualizado.getApellido(), actualizado.getEmail(), actualizado.getCelular(), actualizado.getPerfil(),
+				roles, actualizado.getPuntosAcumulados(), actualizado.getFechaRegistro());
+
+		return ResponseEntity.ok(dto);
+	}
+
+	// Asignar rol (solo ADMIN debería acceder a este endpoint)
+	@PutMapping("/{id}/asignar-rol")
+	public ResponseEntity<?> asignarRol(@PathVariable Long id, @RequestBody Map<String, String> body) {
+		String rol = body.get("rolNombre");
+		usuarioService.asignarRol(id, rol);
+		return ResponseEntity.ok("Rol asignado correctamente");
+	}
 }

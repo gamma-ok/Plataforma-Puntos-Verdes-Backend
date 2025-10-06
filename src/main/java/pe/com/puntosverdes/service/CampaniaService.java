@@ -1,7 +1,6 @@
 package pe.com.puntosverdes.service;
 
 import pe.com.puntosverdes.model.Campania;
-
 import java.util.List;
 
 public interface CampaniaService {

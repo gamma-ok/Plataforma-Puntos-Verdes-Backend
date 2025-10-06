@@ -5,27 +5,26 @@ import org.springframework.stereotype.Service;
 import pe.com.puntosverdes.model.UsuarioRol;
 import pe.com.puntosverdes.repository.UsuarioRolRepository;
 import pe.com.puntosverdes.service.UsuarioRolService;
-
 import java.util.List;
 
 @Service
 public class UsuarioRolServiceImpl implements UsuarioRolService {
 
-    @Autowired
-    private UsuarioRolRepository usuarioRolRepository;
+	@Autowired
+	private UsuarioRolRepository usuarioRolRepository;
 
-    @Override
-    public UsuarioRol asignarRolUsuario(UsuarioRol usuarioRol) {
-        return usuarioRolRepository.save(usuarioRol);
-    }
+	@Override
+	public UsuarioRol asignarRolUsuario(UsuarioRol usuarioRol) {
+		return usuarioRolRepository.save(usuarioRol);
+	}
 
-    @Override
-    public void eliminarRolUsuario(Long id) {
-        usuarioRolRepository.deleteById(id);
-    }
+	@Override
+	public void eliminarRolUsuario(Long id) {
+		usuarioRolRepository.deleteById(id);
+	}
 
-    @Override
-    public List<UsuarioRol> listarRolesDeUsuarios() {
-        return usuarioRolRepository.findAll();
-    }
+	@Override
+	public List<UsuarioRol> listarRolesDeUsuarios() {
+		return usuarioRolRepository.findAll();
+	}
 }

@@ -23,93 +23,83 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
+	@Autowired
+	private JwtAuthenticationEntryPoint unauthorizedHandler;
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+	@Autowired
+	private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+	@Autowired
+	private UserDetailsServiceImpl userDetailsService;
 
-    // --- Beans de autenticación ---
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	// --- Beans de autenticación ---
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
+	@Bean
+	public AuthenticationProvider authenticationProvider() {
+		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+		provider.setUserDetailsService(userDetailsService);
+		provider.setPasswordEncoder(passwordEncoder());
+		return provider;
+	}
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+		return config.getAuthenticationManager();
+	}
 
-    // --- Configuración principal de seguridad ---
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.disable())
-            .authorizeHttpRequests(auth -> auth
+	// --- Configuración principal de seguridad ---
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable()).authorizeHttpRequests(auth -> auth
 
-                // --- Rutas públicas ---
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/api/usuarios/registrar").permitAll()
-                .requestMatchers(HttpMethod.GET, "/entregas/evidencias/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/incidencias/evidencias/**").permitAll()
+				// --- Rutas públicas ---
+				.requestMatchers("/auth/**").permitAll().requestMatchers("/api/usuarios/registrar").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/entregas/evidencias/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/incidencias/evidencias/**").permitAll()
 
-                // --- CANJES ---
-                // Solicitar canje -> CIUDADANO o RECOLECTOR
-                .requestMatchers(HttpMethod.POST, "/api/canjes/solicitar").hasAnyRole("CIUDADANO", "RECOLECTOR")
-                // Resolver (aprobar o rechazar) -> ADMIN o MUNICIPALIDAD
-                .requestMatchers(HttpMethod.PUT, "/api/canjes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-                // Consultar (listar, obtener por ID, por usuario)
-                .requestMatchers(HttpMethod.GET, "/api/canjes/**").authenticated()
+				// --- CANJES ---
+				.requestMatchers(HttpMethod.POST, "/api/canjes/solicitar").hasAnyRole("CIUDADANO", "RECOLECTOR")
+				.requestMatchers(HttpMethod.PUT, "/api/canjes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/canjes/**").authenticated()
 
-                // --- Gestión de usuarios ---
-                .requestMatchers("/api/usuarios/{id}/asignar-rol").hasRole("ADMIN")
+				// --- GESTIÓN DE USUARIOS ---
+				.requestMatchers("/api/usuarios/{id}/asignar-rol").hasRole("ADMIN")
 
-                // --- ENTREGAS ---
-                .requestMatchers(HttpMethod.POST, "/entregas/**").hasRole("CIUDADANO")
-                .requestMatchers(HttpMethod.PUT, "/entregas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-                .requestMatchers(HttpMethod.GET, "/entregas/**").authenticated()
+				// --- ENTREGAS ---
+				.requestMatchers(HttpMethod.POST, "/api/entregas/**").hasAnyRole("CIUDADANO", "RECOLECTOR")
+				.requestMatchers(HttpMethod.PUT, "/api/entregas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/entregas/**").authenticated()
 
-                // --- INCIDENCIAS ---
-                .requestMatchers(HttpMethod.POST, "/incidencias/{id}/evidencias").hasRole("RECOLECTOR")
-                .requestMatchers(HttpMethod.POST, "/incidencias/**").hasRole("RECOLECTOR")
-                .requestMatchers(HttpMethod.PUT, "/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-                .requestMatchers(HttpMethod.GET, "/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR")
+				// --- INCIDENCIAS ---
+				.requestMatchers(HttpMethod.POST, "/api/incidencias/{id}/evidencias").hasRole("RECOLECTOR")
+				.requestMatchers(HttpMethod.POST, "/api/incidencias/**").hasRole("RECOLECTOR")
+				.requestMatchers(HttpMethod.PUT, "/api/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/incidencias/**")
+				.hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR")
 
-                // --- PUNTOS VERDES ---
-                .requestMatchers(HttpMethod.GET, "/puntos-verdes/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-                .requestMatchers(HttpMethod.PUT, "/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				// --- PUNTOS VERDES ---
+				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/**").authenticated()
+				.requestMatchers(HttpMethod.POST, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-                // --- CAMPAÑAS ---
-                .requestMatchers(HttpMethod.GET, "/campanias/**").authenticated()
-                .requestMatchers(HttpMethod.POST, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-                .requestMatchers(HttpMethod.PUT, "/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				// --- CAMPAÑAS ---
+				.requestMatchers(HttpMethod.GET, "/api/campanias/**").authenticated()
+				.requestMatchers(HttpMethod.POST, "/api/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-                // --- DASHBOARD ---
-                // Solo accesible por ADMIN o MUNICIPALIDAD
-                .requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-                
-                // --- Cualquier otra ruta requiere autenticación ---
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+				// --- DASHBOARD ---
+				.requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-        // --- Filtro JWT ---
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+				// --- Cualquier otra ruta requiere autenticación ---
+				.anyRequest().authenticated()).exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        return http.build();
-    }
+		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+		return http.build();
+	}
 }

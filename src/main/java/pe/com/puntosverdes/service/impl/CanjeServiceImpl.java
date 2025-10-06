@@ -17,108 +17,104 @@ import java.util.List;
 @Service
 public class CanjeServiceImpl implements CanjeService {
 
-    @Autowired
-    private CanjeRepository canjeRepository;
+	@Autowired
+	private CanjeRepository canjeRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private RecompensaRepository recompensaRepository;
+	@Autowired
+	private RecompensaRepository recompensaRepository;
 
-    @Override
-    @Transactional
-    public Canje crearCanje(Usuario usuario, Recompensa recompensa) {
-        Canje canje = new Canje();
-        canje.setUsuario(usuario);
-        canje.setRecompensa(recompensa);
-        canje.setFechaSolicitud(LocalDateTime.now());
-        canje.setEstado("PENDIENTE");
-        canje.setPuntosUsados(recompensa.getPuntosNecesarios());
-        return canjeRepository.save(canje);
-    }
+	@Override
+	@Transactional
+	public Canje crearCanje(Usuario usuario, Recompensa recompensa) {
+		Canje canje = new Canje();
+		canje.setUsuario(usuario);
+		canje.setRecompensa(recompensa);
+		canje.setFechaSolicitud(LocalDateTime.now());
+		canje.setEstado("PENDIENTE");
+		canje.setPuntosUsados(recompensa.getPuntosNecesarios());
+		return canjeRepository.save(canje);
+	}
 
-    @Override
-    @Transactional
-    public Canje aprobarCanje(Long canjeId, String respuestaAdmin) {
-        Canje canje = canjeRepository.findById(canjeId)
-                .orElseThrow(() -> new RuntimeException("Canje no encontrado con id: " + canjeId));
+	@Override
+	@Transactional
+	public Canje aprobarCanje(Long canjeId, String respuestaAdmin) {
+		Canje canje = canjeRepository.findById(canjeId)
+				.orElseThrow(() -> new RuntimeException("Canje no encontrado con id: " + canjeId));
 
-        Usuario usuario = canje.getUsuario();
-        Recompensa recompensa = canje.getRecompensa();
+		Usuario usuario = canje.getUsuario();
+		Recompensa recompensa = canje.getRecompensa();
 
-        int puntosNecesarios = recompensa.getPuntosNecesarios();
-        if (usuario.getPuntosAcumulados() < puntosNecesarios) {
-            throw new RuntimeException("El usuario no tiene puntos suficientes para este canje.");
-        }
+		int puntosNecesarios = recompensa.getPuntosNecesarios();
+		if (usuario.getPuntosAcumulados() < puntosNecesarios) {
+			throw new RuntimeException("El usuario no tiene puntos suficientes para este canje.");
+		}
 
-        usuario.setPuntosAcumulados(usuario.getPuntosAcumulados() - puntosNecesarios);
-        usuarioRepository.save(usuario);
+		usuario.setPuntosAcumulados(usuario.getPuntosAcumulados() - puntosNecesarios);
+		usuarioRepository.save(usuario);
 
-        canje.setEstado("APROBADO");
-        canje.setRespuestaAdmin(respuestaAdmin);
-        canje.setFechaResolucion(LocalDateTime.now());
-        return canjeRepository.save(canje);
-    }
+		canje.setEstado("APROBADO");
+		canje.setRespuestaAdmin(respuestaAdmin);
+		canje.setFechaResolucion(LocalDateTime.now());
+		return canjeRepository.save(canje);
+	}
 
-    @Override
-    @Transactional
-    public Canje rechazarCanje(Long canjeId, String motivo, String respuestaAdmin) {
-        Canje canje = canjeRepository.findById(canjeId)
-                .orElseThrow(() -> new RuntimeException("Canje no encontrado con id: " + canjeId));
+	@Override
+	@Transactional
+	public Canje rechazarCanje(Long canjeId, String motivo, String respuestaAdmin) {
+		Canje canje = canjeRepository.findById(canjeId)
+				.orElseThrow(() -> new RuntimeException("Canje no encontrado con id: " + canjeId));
 
-        canje.setEstado("RECHAZADO");
-        canje.setMotivoRechazo(motivo);
-        canje.setRespuestaAdmin(respuestaAdmin);
-        canje.setFechaResolucion(LocalDateTime.now());
-        return canjeRepository.save(canje);
-    }
+		canje.setEstado("RECHAZADO");
+		canje.setMotivoRechazo(motivo);
+		canje.setRespuestaAdmin(respuestaAdmin);
+		canje.setFechaResolucion(LocalDateTime.now());
+		return canjeRepository.save(canje);
+	}
 
-    @Override
-    public Canje obtenerPorId(Long id) {
-        return canjeRepository.findById(id).orElse(null);
-    }
+	@Override
+	public Canje obtenerPorId(Long id) {
+		return canjeRepository.findById(id).orElse(null);
+	}
 
-    @Override
-    public List<Canje> listarCanjes() {
-        return canjeRepository.findAll();
-    }
+	@Override
+	public List<Canje> listarCanjes() {
+		return canjeRepository.findAll();
+	}
 
-    @Override
-    public List<Canje> listarPorUsuario(Long usuarioId) {
-        return canjeRepository.findByUsuarioId(usuarioId);
-    }
+	@Override
+	public List<Canje> listarPorUsuario(Long usuarioId) {
+		return canjeRepository.findByUsuarioId(usuarioId);
+	}
 
-    // 🔍 Implementación flexible del filtro
-    @Override
-    public List<Canje> buscarCanjes(String estado, String fechaInicio, String fechaFin, Long usuarioId) {
-        // Si todos los parámetros son nulos, retornar todos los canjes
-        if (estado == null && fechaInicio == null && fechaFin == null && usuarioId == null) {
-            return canjeRepository.findAll();
-        }
+	@Override
+	public List<Canje> buscarCanjes(String estado, String fechaInicio, String fechaFin, Long usuarioId) {
+		if (estado == null && fechaInicio == null && fechaFin == null && usuarioId == null) {
+			return canjeRepository.findAll();
+		}
 
-        // Formato de fechas esperado: "yyyy-MM-ddTHH:mm:ss" o solo "yyyy-MM-dd"
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd['T'HH:mm[:ss]]");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd['T'HH:mm[:ss]]");
 
-        if (usuarioId != null && estado != null) {
-            return canjeRepository.findByUsuarioIdAndEstado(usuarioId, estado);
-        }
+		if (usuarioId != null && estado != null) {
+			return canjeRepository.findByUsuarioIdAndEstado(usuarioId, estado);
+		}
 
-        if (estado != null) {
-            return canjeRepository.findByEstado(estado);
-        }
+		if (estado != null) {
+			return canjeRepository.findByEstado(estado);
+		}
 
-        if (fechaInicio != null && fechaFin != null) {
-            LocalDateTime inicio = LocalDateTime.parse(fechaInicio, formatter);
-            LocalDateTime fin = LocalDateTime.parse(fechaFin, formatter);
-            return canjeRepository.findByFechaSolicitudBetween(inicio, fin);
-        }
+		if (fechaInicio != null && fechaFin != null) {
+			LocalDateTime inicio = LocalDateTime.parse(fechaInicio, formatter);
+			LocalDateTime fin = LocalDateTime.parse(fechaFin, formatter);
+			return canjeRepository.findByFechaSolicitudBetween(inicio, fin);
+		}
 
-        if (usuarioId != null) {
-            return canjeRepository.findByUsuarioId(usuarioId);
-        }
+		if (usuarioId != null) {
+			return canjeRepository.findByUsuarioId(usuarioId);
+		}
 
-        // Si no se cumple ningún filtro específico, devolvemos todo
-        return canjeRepository.findAll();
-    }
+		return canjeRepository.findAll();
+	}
 }

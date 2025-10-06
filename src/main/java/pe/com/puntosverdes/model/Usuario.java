@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.persistence.*;
 import pe.com.puntosverdes.security.Authority;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -38,13 +37,12 @@ public class Usuario implements UserDetails {
 
 	private boolean enabled = true;
 
-	private String perfil; // URL o ruta de la foto de perfil
+	private String perfil;
 
 	private int puntosAcumulados = 0;
 
 	private LocalDateTime fechaRegistro = LocalDateTime.now();
 
-	// Relación con UsuarioRol
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "usuario", orphanRemoval = true)
 	@JsonIgnore
 	private Set<UsuarioRol> usuarioRoles = new HashSet<>();
@@ -69,20 +67,18 @@ public class Usuario implements UserDetails {
 		this.usuarioRoles = usuarioRoles;
 	}
 
-	// Métodos UserDetails
 	@Override
 	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-	    Set<Authority> autoridades = new HashSet<>();
-	    this.usuarioRoles.forEach(usuarioRol -> {
-	        // Asegura que todos los roles tengan el prefijo ROLE_
-	        String rolNombre = usuarioRol.getRol().getRolNombre();
-	        if (!rolNombre.startsWith("ROLE_")) {
-	            rolNombre = "ROLE_" + rolNombre;
-	        }
-	        autoridades.add(new Authority(rolNombre));
-	    });
-	    return autoridades;
+		Set<Authority> autoridades = new HashSet<>();
+		this.usuarioRoles.forEach(usuarioRol -> {
+			String rolNombre = usuarioRol.getRol().getRolNombre();
+			if (!rolNombre.startsWith("ROLE_")) {
+				rolNombre = "ROLE_" + rolNombre;
+			}
+			autoridades.add(new Authority(rolNombre));
+		});
+		return autoridades;
 	}
 
 	@Override
@@ -118,7 +114,6 @@ public class Usuario implements UserDetails {
 		return enabled;
 	}
 
-	// Getters & Setters
 	public Long getId() {
 		return id;
 	}

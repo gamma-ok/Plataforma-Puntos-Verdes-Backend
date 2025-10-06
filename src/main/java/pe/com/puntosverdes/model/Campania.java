@@ -22,28 +22,24 @@ public class Campania {
 	private LocalDateTime fechaInicio;
 	private LocalDateTime fechaFin;
 
-	private String ubicacion; // lugar de la campaña
+	private String ubicacion;
 
 	private boolean activa = true;
 
-	private int puntosExtra = 0; // puntos adicionales por participar
+	private int puntosExtra = 0;
 
-	// Usuario que la creó (ADMIN o MUNICIPALIDAD)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creado_por_id")
 	@JsonIgnore
 	private Usuario creadoPor;
 
-	// Entregas asociadas a esta campaña
 	@OneToMany(mappedBy = "campania", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
 	private Set<Entrega> entregas = new HashSet<>();
 
-	// Constructor vacío
 	public Campania() {
 	}
 
-	// Constructor personalizado
 	public Campania(String titulo, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin,
 			String ubicacion, int puntosExtra, Usuario creadoPor) {
 		this.titulo = titulo;
@@ -56,7 +52,6 @@ public class Campania {
 		this.activa = true;
 	}
 
-	// Getters y Setters
 	public Long getId() {
 		return id;
 	}

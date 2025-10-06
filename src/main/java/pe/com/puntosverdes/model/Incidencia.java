@@ -2,7 +2,6 @@ package pe.com.puntosverdes.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,22 +22,19 @@ public class Incidencia {
 	private boolean validada = false;
 	private LocalDateTime fechaValidacion;
 
-	private String observaciones; // Comentarios del ADMIN/MUNICIPALIDAD
+	private String observaciones;
 	private int puntosGanados = 0;
 
-	// Usuario que reporta la incidencia (Recolector o Ciudadano)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "reportado_por_id", nullable = false)
 	@JsonIgnoreProperties({ "usuarioRoles" })
 	private Usuario reportadoPor;
 
-	// Admin/Municipalidad que valida la incidencia
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "validado_por_id")
 	@JsonIgnoreProperties({ "usuarioRoles" })
 	private Usuario validadoPor;
 
-	// Evidencias: URLs de imágenes subidas
 	@ElementCollection
 	@CollectionTable(name = "incidencia_evidencias", joinColumns = @JoinColumn(name = "incidencia_id"))
 	@Column(name = "url")
@@ -53,7 +49,6 @@ public class Incidencia {
 		this.reportadoPor = reportadoPor;
 	}
 
-	// Getters y setters
 	public Long getId() {
 		return id;
 	}

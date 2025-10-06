@@ -32,7 +32,6 @@ public class Recompensa {
 		this.activo = true;
 	}
 
-	// Getters & Setters
 	public Long getId() {
 		return id;
 	}

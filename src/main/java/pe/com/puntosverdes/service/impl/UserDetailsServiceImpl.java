@@ -11,15 +11,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByUsername(username);
-        if (usuario == null) {
-            throw new UsernameNotFoundException("Usuario no encontrado: " + username);
-        }
-        return usuario; // Aquí `Usuario` implementa UserDetails, así que se devuelve directamente
-    }
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		Usuario usuario = usuarioRepository.findByUsername(username);
+		if (usuario == null) {
+			throw new UsernameNotFoundException("Usuario no encontrado: " + username);
+		}
+		return usuario;
+	}
 }

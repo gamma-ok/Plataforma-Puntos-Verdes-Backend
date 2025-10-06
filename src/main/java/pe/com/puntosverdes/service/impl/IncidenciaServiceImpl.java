@@ -9,7 +9,6 @@ import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.repository.IncidenciaRepository;
 import pe.com.puntosverdes.repository.UsuarioRepository;
 import pe.com.puntosverdes.service.IncidenciaService;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,15 +66,15 @@ public class IncidenciaServiceImpl implements IncidenciaService {
 				actualizada.getFechaReporte(), actualizada.getFechaValidacion(),
 				actualizada.getReportadoPor().getUsername(), rolUsuario);
 	}
-	
+
 	@Override
 	public Incidencia subirEvidencias(Long incidenciaId, List<String> rutasEvidencias) {
-	    return incidenciaRepository.findById(incidenciaId).map(incidencia -> {
-	        if (incidencia.getEvidencias() == null) {
-	            incidencia.setEvidencias(new ArrayList<>());
-	        }
-	        incidencia.getEvidencias().addAll(rutasEvidencias);
-	        return incidenciaRepository.save(incidencia);
-	    }).orElseThrow(() -> new RuntimeException("Incidencia no encontrada con id: " + incidenciaId));
+		return incidenciaRepository.findById(incidenciaId).map(incidencia -> {
+			if (incidencia.getEvidencias() == null) {
+				incidencia.setEvidencias(new ArrayList<>());
+			}
+			incidencia.getEvidencias().addAll(rutasEvidencias);
+			return incidenciaRepository.save(incidencia);
+		}).orElseThrow(() -> new RuntimeException("Incidencia no encontrada con id: " + incidenciaId));
 	}
 }

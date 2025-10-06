@@ -11,7 +11,6 @@ import pe.com.puntosverdes.model.PuntoVerde;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.PuntoVerdeService;
 import pe.com.puntosverdes.service.UsuarioService;
-
 import java.util.List;
 
 @RestController

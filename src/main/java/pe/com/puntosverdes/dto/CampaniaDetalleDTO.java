@@ -4,19 +4,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class CampaniaDetalleDTO {
-    private Long id;
-    private String titulo;
-    private String descripcion;
-    private String ubicacion;
-    private boolean activa;
-    private int puntosExtra;
-    private LocalDateTime fechaInicio;
-    private LocalDateTime fechaFin;
-    private String creadoPorNombre;
-    private String creadoPorRol;
-    private List<String> entregas;
+	private Long id;
+	private String titulo;
+	private String descripcion;
+	private String ubicacion;
+	private boolean activa;
+	private int puntosExtra;
+	private LocalDateTime fechaInicio;
+	private LocalDateTime fechaFin;
+	private String creadoPorNombre;
+	private String creadoPorRol;
+	private List<String> entregas;
 
-    public CampaniaDetalleDTO() {}
+	public CampaniaDetalleDTO() {
+	}
 
 	public Long getId() {
 		return id;

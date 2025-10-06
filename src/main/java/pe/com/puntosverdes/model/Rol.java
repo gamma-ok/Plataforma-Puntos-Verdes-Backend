@@ -26,7 +26,6 @@ public class Rol {
 		this.rolNombre = rolNombre;
 	}
 
-	// Getters & Setters
 	public Long getRolId() {
 		return rolId;
 	}
