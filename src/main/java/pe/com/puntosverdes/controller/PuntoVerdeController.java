@@ -10,7 +10,7 @@ import pe.com.puntosverdes.model.PuntoVerde;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.PuntoVerdeService;
 import pe.com.puntosverdes.service.UsuarioService;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/puntos-verdes")
@@ -23,7 +23,7 @@ public class PuntoVerdeController {
 	@Autowired
 	private UsuarioService usuarioService;
 
-	// Registrar un nuevo Punto Verde
+	// Registrar
 	@PostMapping("/registrar")
 	public ResponseEntity<PuntoVerdeDTO> registrar(@RequestBody PuntoVerdeRegistroDTO dto, Authentication auth) {
 		Usuario creador = usuarioService.obtenerUsuarioPorUsername(auth.getName());
@@ -41,7 +41,7 @@ public class PuntoVerdeController {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDTO(guardado));
 	}
 
-	// Actualizar un punto verde existente
+	// Actualizar
 	@PutMapping("/{id}/actualizar")
 	public ResponseEntity<PuntoVerdeDTO> actualizar(@PathVariable Long id, @RequestBody PuntoVerdeRegistroDTO dto) {
 		PuntoVerde datos = new PuntoVerde();
@@ -62,7 +62,7 @@ public class PuntoVerdeController {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDTOList(puntoVerdeService.listarPuntosVerdes()));
 	}
 
-	// Listar por estado
+	// Listar por estado (true/false)
 	@GetMapping("/estado/{activo}")
 	public ResponseEntity<List<PuntoVerdeDTO>> listarPorEstado(@PathVariable boolean activo) {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDTOList(puntoVerdeService.listarPorEstado(activo)));
@@ -74,7 +74,7 @@ public class PuntoVerdeController {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDTOList(puntoVerdeService.buscarPorNombre(nombre)));
 	}
 
-	// Detalle por ID
+	// Detalle
 	@GetMapping("/{id}/detalle")
 	public ResponseEntity<PuntoVerdeDetalleDTO> obtenerPorId(@PathVariable Long id) {
 		PuntoVerde pv = puntoVerdeService.obtenerPorId(id);
@@ -83,10 +83,27 @@ public class PuntoVerdeController {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDetalleDTO(pv));
 	}
 
-	// Cambiar estado (activar/desactivar)
-	@PutMapping("/{id}/estado")
-	public ResponseEntity<PuntoVerdeDTO> cambiarEstado(@PathVariable Long id, @RequestParam boolean activo) {
-		PuntoVerde actualizado = puntoVerdeService.cambiarEstado(id, activo);
-		return ResponseEntity.ok(PuntoVerdeMapper.toDTO(actualizado));
+	// Estadisticas generales
+	@GetMapping("/estadisticas")
+	public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
+		List<PuntoVerde> puntos = puntoVerdeService.listarPuntosVerdes();
+
+		long total = puntos.size();
+		long activos = puntos.stream().filter(PuntoVerde::isActivo).count();
+		long inactivos = total - activos;
+
+		double promedioEntregas = puntos.stream().mapToInt(p -> p.getEntregas().size()).average().orElse(0.0);
+
+		PuntoVerde masUsado = puntos.stream().max(Comparator.comparingInt(p -> p.getEntregas().size())).orElse(null);
+
+		Map<String, Object> estadisticas = new HashMap<>();
+		estadisticas.put("totalPuntosVerdes", total);
+		estadisticas.put("puntosActivos", activos);
+		estadisticas.put("puntosInactivos", inactivos);
+		estadisticas.put("promedioEntregasPorPunto", promedioEntregas);
+		estadisticas.put("puntoVerdeMasUsado",
+				masUsado != null ? masUsado.getNombre() + " (" + masUsado.getEntregas().size() + " entregas)" : "N/A");
+
+		return ResponseEntity.ok(estadisticas);
 	}
 }

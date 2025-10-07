@@ -19,19 +19,6 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 	}
 
 	@Override
-	public PuntoVerde actualizarPuntoVerde(Long id, PuntoVerde datos) {
-		PuntoVerde existente = puntoVerdeRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con id: " + id));
-
-		existente.setNombre(datos.getNombre());
-		existente.setDireccion(datos.getDireccion());
-		existente.setDescripcion(datos.getDescripcion());
-		existente.setLatitud(datos.getLatitud());
-		existente.setLongitud(datos.getLongitud());
-		return puntoVerdeRepository.save(existente);
-	}
-
-	@Override
 	public PuntoVerde obtenerPorId(Long id) {
 		return puntoVerdeRepository.findById(id).orElse(null);
 	}
@@ -43,7 +30,7 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 
 	@Override
 	public List<PuntoVerde> listarPorEstado(boolean activo) {
-		return activo ? puntoVerdeRepository.findByActivoTrue() : puntoVerdeRepository.findByActivoFalse();
+		return puntoVerdeRepository.findByActivoTrue().stream().filter(p -> p.isActivo() == activo).toList();
 	}
 
 	@Override
@@ -51,11 +38,24 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 		return puntoVerdeRepository.findByNombreContainingIgnoreCase(nombre);
 	}
 
+	// Actualizar
 	@Override
-	public PuntoVerde cambiarEstado(Long id, boolean activo) {
-		PuntoVerde punto = puntoVerdeRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con id: " + id));
-		punto.setActivo(activo);
-		return puntoVerdeRepository.save(punto);
+	public PuntoVerde actualizarPuntoVerde(Long id, PuntoVerde datos) {
+		PuntoVerde existente = puntoVerdeRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con ID: " + id));
+
+		if (datos.getNombre() != null)
+			existente.setNombre(datos.getNombre());
+		if (datos.getDireccion() != null)
+			existente.setDireccion(datos.getDireccion());
+		if (datos.getDescripcion() != null)
+			existente.setDescripcion(datos.getDescripcion());
+		if (datos.getLatitud() != null)
+			existente.setLatitud(datos.getLatitud());
+		if (datos.getLongitud() != null)
+			existente.setLongitud(datos.getLongitud());
+		existente.setActivo(datos.isActivo()); // ✅ también se actualiza el estado
+
+		return puntoVerdeRepository.save(existente);
 	}
 }
