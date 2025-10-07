@@ -35,10 +35,10 @@ public class EntregaServiceImpl implements EntregaService {
     private EntregaListadoDTO convertirAListadoDTO(Entrega entrega) {
         String estado;
         if (entrega.isValidada()) {
-            estado = "APROBADA";
+            estado = "APROBADO";
         } else if (entrega.getRespuestaAdmin() != null
                 && entrega.getRespuestaAdmin().toLowerCase().contains("rechaz")) {
-            estado = "RECHAZADA";
+            estado = "RECHAZADO";
         } else {
             estado = "PENDIENTE";
         }
@@ -78,13 +78,11 @@ public class EntregaServiceImpl implements EntregaService {
         }
         String e = estado.trim().toUpperCase();
         switch (e) {
-            case "APROBADA":
             case "APROBADO":
                 return entregaRepository.findAll().stream()
                         .filter(Entrega::isValidada)
                         .map(this::convertirAListadoDTO)
                         .collect(Collectors.toList());
-            case "RECHAZADA":
             case "RECHAZADO":
                 return entregaRepository.findAll().stream()
                         .filter(ent -> ent.getRespuestaAdmin() != null
@@ -162,11 +160,11 @@ public class EntregaServiceImpl implements EntregaService {
     // Método explícito para rechazar (útil desde controlador si quieres separar la ruta)
     public EntregaValidadaDTO rechazarEntrega(Long entregaId, String motivoRechazo, String respuestaAdmin) {
         Entrega entrega = entregaRepository.findById(entregaId)
-                .orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
+                .orElseThrow(() -> new EntregaNotFoundException("La entrega no encontrado con el ID: " + entregaId));
 
         entrega.setValidada(false);
         entrega.setFechaValidacion(LocalDateTime.now());
-        entrega.setRespuestaAdmin(respuestaAdmin != null ? respuestaAdmin : "Entrega rechazada");
+        entrega.setRespuestaAdmin(respuestaAdmin != null ? respuestaAdmin : "La entrega ha sido rechazado");
         entrega.setObservaciones(motivoRechazo);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -200,7 +198,7 @@ public class EntregaServiceImpl implements EntregaService {
     public UltimaEntregaDTO obtenerUltimaEntregaPorCiudadano(Long ciudadanoId) {
         Entrega ultima = entregaRepository.findTopByCiudadanoIdOrderByFechaEntregaDesc(ciudadanoId);
         if (ultima == null) {
-            throw new EntregaNotFoundException("No se encontró última entrega para el ciudadano con id: " + ciudadanoId);
+            throw new EntregaNotFoundException("No se encontró última entrega para el ciudadano con ID: " + ciudadanoId);
         }
         return new UltimaEntregaDTO(ultima.getMaterial(), ultima.getCantidad(), ultima.getFechaEntrega());
     }
@@ -230,6 +228,6 @@ public class EntregaServiceImpl implements EntregaService {
                     entrega.getEvidencias().addAll(rutasEvidencias);
                     return entregaRepository.save(entrega);
                 })
-                .orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
+                .orElseThrow(() -> new EntregaNotFoundException("La entrega no ha sido encontrado con ID: " + entregaId));
     }
 }
