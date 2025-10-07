@@ -4,10 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +13,7 @@ import pe.com.puntosverdes.model.Entrega;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.EntregaService;
 import pe.com.puntosverdes.service.UsuarioService;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -36,7 +34,7 @@ public class EntregaController {
     @Value("${upload.dir:uploads/entregas/}")
     private String uploadDir;
 
-    // Registrar una entrega
+    // Registrar una entrega (Ciudadano o Recolector)
     @PostMapping("/registrar")
     public ResponseEntity<Entrega> registrarEntrega(@RequestBody Entrega entrega, Authentication authentication) {
         Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
@@ -44,71 +42,62 @@ public class EntregaController {
         return ResponseEntity.ok(entregaService.registrarEntrega(entrega));
     }
 
-    // Listar TODAS las entregas (solo admin o municipalidad)
-    @GetMapping("/listar-todas")
-    public ResponseEntity<List<Entrega>> listarEntregas() {
-        return ResponseEntity.ok(entregaService.listarEntregas());
+    // Listar TODAS las entregas (Admin/Municipalidad)
+    @GetMapping("/listar")
+    public ResponseEntity<List<EntregaListadoDTO>> listarTodas() {
+        return ResponseEntity.ok(entregaService.listarEntregasDTO());
     }
 
-    // Listar entregas por usuario (ya sea ciudadano o recolector)
-    @GetMapping("/usuario/{usuarioId}/listar")
-    public ResponseEntity<List<Entrega>> listarPorUsuario(@PathVariable Long usuarioId) {
-        List<Entrega> entregas = new ArrayList<>();
-        entregas.addAll(entregaService.listarEntregasPorCiudadano(usuarioId));
-        entregas.addAll(entregaService.listarEntregasPorRecolector(usuarioId));
-        return ResponseEntity.ok(entregas);
+    // Listar entregas por estado (APROBADA, PENDIENTE, RECHAZADA)
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<List<EntregaListadoDTO>> listarPorEstado(@PathVariable String estado) {
+        return ResponseEntity.ok(entregaService.listarEntregasPorEstado(estado));
     }
 
-    // Listar solo entregas de ciudadanos
-    @GetMapping("/ciudadanos")
-    public ResponseEntity<List<Entrega>> listarEntregasDeCiudadanos() {
-        List<Entrega> entregas = entregaService.listarEntregas();
-        List<Entrega> filtradas = entregas.stream()
-                .filter(e -> e.getCiudadano() != null && e.getCiudadano().getUsuarioRoles().stream()
-                        .anyMatch(r -> r.getRol().getRolNombre().equalsIgnoreCase("ROLE_CIUDADANO")))
-                .toList();
-        return ResponseEntity.ok(filtradas);
+    // Listar entregas por usuario (Ciudadano o Recolector)
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<EntregaListadoDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(entregaService.listarEntregasPorUsuario(usuarioId));
     }
 
-    // Listar solo entregas de recolectores
-    @GetMapping("/recolectores")
-    public ResponseEntity<List<Entrega>> listarEntregasDeRecolectores() {
-        List<Entrega> entregas = entregaService.listarEntregas();
-        List<Entrega> filtradas = entregas.stream()
-                .filter(e -> e.getRecolector() != null && e.getRecolector().getUsuarioRoles().stream()
-                        .anyMatch(r -> r.getRol().getRolNombre().equalsIgnoreCase("ROLE_RECOLECTOR")))
-                .toList();
-        return ResponseEntity.ok(filtradas);
-    }
-
-    // Ver detalle de una entrega específica
+    // Obtener detalle de una entrega
     @GetMapping("/{entregaId}/detalle")
-    public ResponseEntity<Entrega> obtenerEntregaPorId(@PathVariable Long entregaId) {
-        return entregaService.listarEntregas().stream()
+    public ResponseEntity<EntregaListadoDTO> obtenerEntregaPorId(@PathVariable Long entregaId) {
+        return entregaService.listarEntregasDTO().stream()
                 .filter(e -> e.getId().equals(entregaId))
                 .findFirst()
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Validar entrega (Admin o Municipalidad)
-    @PutMapping("/{id}/validar")
-    public ResponseEntity<EntregaValidadaDTO> validarEntrega(@PathVariable Long id,
-                                                             @RequestBody EntregaValidacionDTO dto,
-                                                             Authentication authentication) {
+    // Resolver entrega (validar o rechazar con una sola consulta)
+    @PutMapping("/{id}/resolver")
+    public ResponseEntity<EntregaValidadaDTO> resolverEntrega(
+            @PathVariable Long id,
+            @RequestBody EntregaValidacionDTO dto,
+            Authentication authentication
+    ) {
         Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
-        EntregaValidadaDTO entrega = entregaService.validarEntrega(
-                id,
-                dto.isValidada(),
-                dto.getPuntosGanados(),
-                dto.getRespuestaAdmin(),
-                dto.getObservaciones(),
-                usuario.getId()
-        );
-        return ResponseEntity.ok(entrega);
+
+        if (dto.isValidada()) {
+            return ResponseEntity.ok(entregaService.validarEntrega(
+                    id,
+                    true,
+                    dto.getPuntosGanados(),
+                    dto.getRespuestaAdmin(),
+                    dto.getObservaciones(),
+                    usuario.getId()
+            ));
+        } else {
+            return ResponseEntity.ok(entregaService.rechazarEntrega(
+                    id,
+                    dto.getObservaciones(),
+                    dto.getRespuestaAdmin()
+            ));
+        }
     }
 
-    // Última entrega del usuario
+    // Ultima entrega del usuario
     @GetMapping("/usuario/{usuarioId}/ultima")
     public ResponseEntity<UltimaEntregaDTO> ultimaEntrega(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(entregaService.obtenerUltimaEntregaPorCiudadano(usuarioId));
@@ -122,8 +111,10 @@ public class EntregaController {
 
     // Subir evidencias (Ciudadano o Recolector)
     @PostMapping("/{id}/evidencias")
-    public ResponseEntity<Map<String, Object>> subirEvidencias(@PathVariable Long id,
-                                                               @RequestParam("files") List<MultipartFile> files) {
+    public ResponseEntity<Map<String, Object>> subirEvidencias(
+            @PathVariable Long id,
+            @RequestParam("files") List<MultipartFile> files
+    ) {
         try {
             File directory = new File(uploadDir);
             if (!directory.exists()) directory.mkdirs();
@@ -149,7 +140,7 @@ public class EntregaController {
         }
     }
 
-    // Ver evidencia (público)
+    // Ver evidencia (publico)
     @GetMapping("/evidencias/{fileName:.+}")
     public ResponseEntity<Resource> verEvidencia(@PathVariable String fileName) {
         try {

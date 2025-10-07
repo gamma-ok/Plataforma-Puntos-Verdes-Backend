@@ -4,15 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import pe.com.puntosverdes.dto.EntregaHistorialDTO;
-import pe.com.puntosverdes.dto.EntregaValidadaDTO;
-import pe.com.puntosverdes.dto.UltimaEntregaDTO;
+import pe.com.puntosverdes.dto.*;
 import pe.com.puntosverdes.exception.EntregaNotFoundException;
 import pe.com.puntosverdes.model.Entrega;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.repository.EntregaRepository;
 import pe.com.puntosverdes.repository.UsuarioRepository;
 import pe.com.puntosverdes.service.EntregaService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,117 +19,217 @@ import java.util.stream.Collectors;
 @Service
 public class EntregaServiceImpl implements EntregaService {
 
-	@Autowired
-	private EntregaRepository entregaRepository;
+    @Autowired
+    private EntregaRepository entregaRepository;
 
-	@Autowired
-	private UsuarioRepository usuarioRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-	@Override
-	public Entrega registrarEntrega(Entrega entrega) {
-		return entregaRepository.save(entrega);
-	}
+    @Override
+    public Entrega registrarEntrega(Entrega entrega) {
+        entrega.setFechaEntrega(LocalDateTime.now());
+        return entregaRepository.save(entrega);
+    }
 
-	@Override
-	public List<Entrega> listarEntregas() {
-		return entregaRepository.findAll();
-	}
+    // Convertir Entrega a DTO (Listado)
+    private EntregaListadoDTO convertirAListadoDTO(Entrega entrega) {
+        String estado;
+        if (entrega.isValidada()) {
+            estado = "APROBADA";
+        } else if (entrega.getRespuestaAdmin() != null
+                && entrega.getRespuestaAdmin().toLowerCase().contains("rechaz")) {
+            estado = "RECHAZADA";
+        } else {
+            estado = "PENDIENTE";
+        }
 
-	@Override
-	public List<Entrega> listarEntregasPorCiudadano(Long ciudadanoId) {
-		return entregaRepository.findByCiudadanoId(ciudadanoId);
-	}
+        return new EntregaListadoDTO(
+                entrega.getId(),
+                entrega.getMaterial(),
+                entrega.getCantidad(),
+                estado,
+                entrega.getCiudadano() != null ? entrega.getCiudadano().getUsername() : null,
+                entrega.getRecolector() != null ? entrega.getRecolector().getUsername() : null,
+                entrega.getFechaEntrega(),
+                entrega.getFechaValidacion()
+        );
+    }
 
-	@Override
-	public List<Entrega> listarEntregasPorRecolector(Long recolectorId) {
-		return entregaRepository.findByRecolectorId(recolectorId);
-	}
+    @Override
+    public List<EntregaListadoDTO> listarEntregasDTO() {
+        return entregaRepository.findAll()
+                .stream()
+                .map(this::convertirAListadoDTO)
+                .collect(Collectors.toList());
+    }
 
-	@Override
-	public EntregaValidadaDTO validarEntrega(Long entregaId, boolean validada, int puntosGanados, String respuestaAdmin,
-			String observaciones, Long recolectorId) {
+    @Override
+    public List<EntregaListadoDTO> listarEntregasPorUsuario(Long usuarioId) {
+        List<Entrega> entregas = new ArrayList<>();
+        entregas.addAll(entregaRepository.findByCiudadanoId(usuarioId));
+        entregas.addAll(entregaRepository.findByRecolectorId(usuarioId));
+        return entregas.stream().map(this::convertirAListadoDTO).collect(Collectors.toList());
+    }
 
-		Entrega entrega = entregaRepository.findById(entregaId)
-				.orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
+    @Override
+    public List<EntregaListadoDTO> listarEntregasPorEstado(String estado) {
+        if (estado == null) {
+            return listarEntregasDTO();
+        }
+        String e = estado.trim().toUpperCase();
+        switch (e) {
+            case "APROBADA":
+            case "APROBADO":
+                return entregaRepository.findAll().stream()
+                        .filter(Entrega::isValidada)
+                        .map(this::convertirAListadoDTO)
+                        .collect(Collectors.toList());
+            case "RECHAZADA":
+            case "RECHAZADO":
+                return entregaRepository.findAll().stream()
+                        .filter(ent -> ent.getRespuestaAdmin() != null
+                                && ent.getRespuestaAdmin().toLowerCase().contains("rechaz"))
+                        .map(this::convertirAListadoDTO)
+                        .collect(Collectors.toList());
+            case "PENDIENTE":
+            default:
+                return entregaRepository.findAll().stream()
+                        .filter(ent -> !ent.isValidada()
+                                && (ent.getRespuestaAdmin() == null || !ent.getRespuestaAdmin().toLowerCase().contains("rechaz")))
+                        .map(this::convertirAListadoDTO)
+                        .collect(Collectors.toList());
+        }
+    }
 
-		entrega.setValidada(validada);
-		entrega.setFechaValidacion(java.time.LocalDateTime.now());
-		entrega.setRespuestaAdmin(respuestaAdmin);
-		entrega.setObservaciones(observaciones);
+    @Override
+    public EntregaValidadaDTO validarEntrega(Long entregaId, boolean validada, int puntosGanados, String respuestaAdmin,
+                                             String observaciones, Long recolectorId) {
+        Entrega entrega = entregaRepository.findById(entregaId)
+                .orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
 
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String validadoPor = (auth != null) ? auth.getName() : "Sistema";
-		entrega.setValidadoPor(validadoPor);
+        entrega.setValidada(validada);
+        entrega.setFechaValidacion(LocalDateTime.now());
+        entrega.setRespuestaAdmin(respuestaAdmin);
+        entrega.setObservaciones(observaciones);
 
-		if (recolectorId != null) {
-			Usuario recolector = usuarioRepository.findById(recolectorId)
-					.orElseThrow(() -> new EntregaNotFoundException("Recolector no encontrado"));
-			entrega.setRecolector(recolector);
-		}
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String validadoPor = (auth != null) ? auth.getName() : "Sistema";
+        entrega.setValidadoPor(validadoPor);
 
-		if (validada && puntosGanados > 0) {
-			Usuario ciudadano = entrega.getCiudadano();
-			int totalPuntos = puntosGanados;
+        if (recolectorId != null) {
+            Usuario recolector = usuarioRepository.findById(recolectorId)
+                    .orElseThrow(() -> new EntregaNotFoundException("Recolector no encontrado"));
+            entrega.setRecolector(recolector);
+        }
 
-			if (entrega.getCampania() != null && entrega.getCampania().isActiva()) {
-				totalPuntos += entrega.getCampania().getPuntosExtra();
-			}
+        if (validada && puntosGanados > 0) {
+            Usuario ciudadano = entrega.getCiudadano();
+            int totalPuntos = puntosGanados;
 
-			ciudadano.setPuntosAcumulados(ciudadano.getPuntosAcumulados() + totalPuntos);
-			entrega.setPuntosGanados(totalPuntos);
-			usuarioRepository.save(ciudadano);
-		}
+            if (entrega.getCampania() != null && entrega.getCampania().isActiva()) {
+                totalPuntos += entrega.getCampania().getPuntosExtra();
+            }
 
-		Entrega actualizada = entregaRepository.save(entrega);
+            ciudadano.setPuntosAcumulados(ciudadano.getPuntosAcumulados() + totalPuntos);
+            entrega.setPuntosGanados(totalPuntos);
+            usuarioRepository.save(ciudadano);
+        }
 
-		String rolUsuario = null;
-		if (actualizada.getCiudadano() != null && !actualizada.getCiudadano().getUsuarioRoles().isEmpty()) {
-			rolUsuario = actualizada.getCiudadano().getUsuarioRoles().iterator().next().getRol().getRolNombre();
-		}
+        entregaRepository.save(entrega);
 
-		return new EntregaValidadaDTO(actualizada.getId(), actualizada.getMaterial(), actualizada.getCantidad(),
-				actualizada.getPuntosGanados(), actualizada.isValidada(), actualizada.getRespuestaAdmin(),
-				actualizada.getObservaciones(), actualizada.getFechaValidacion(),
-				actualizada.getCiudadano() != null ? actualizada.getCiudadano().getUsername() : null,
-				actualizada.getPuntoVerde() != null ? actualizada.getPuntoVerde().getDireccion() : null, rolUsuario,
-				actualizada.getValidadoPor());
-	}
+        // construir DTO de respuesta
+        String rolUsuario = null;
+        if (entrega.getCiudadano() != null && !entrega.getCiudadano().getUsuarioRoles().isEmpty()) {
+            rolUsuario = entrega.getCiudadano().getUsuarioRoles().iterator().next().getRol().getRolNombre();
+        }
 
-	@Override
-	public UltimaEntregaDTO obtenerUltimaEntregaPorCiudadano(Long ciudadanoId) {
-		Entrega ultima = entregaRepository.findTopByCiudadanoIdOrderByFechaEntregaDesc(ciudadanoId);
-		if (ultima == null) {
-			throw new EntregaNotFoundException(
-					"No se encontró última entrega para el ciudadano con id: " + ciudadanoId);
-		}
-		return new UltimaEntregaDTO(ultima.getMaterial(), ultima.getCantidad(), ultima.getFechaEntrega());
-	}
+        return new EntregaValidadaDTO(
+                entrega.getId(),
+                entrega.getMaterial(),
+                entrega.getCantidad(),
+                entrega.getPuntosGanados(),
+                entrega.isValidada(),
+                entrega.getRespuestaAdmin(),
+                entrega.getObservaciones(),
+                entrega.getFechaValidacion(),
+                entrega.getCiudadano() != null ? entrega.getCiudadano().getUsername() : null,
+                entrega.getPuntoVerde() != null ? entrega.getPuntoVerde().getDireccion() : null,
+                rolUsuario,
+                entrega.getValidadoPor()
+        );
+    }
 
-	@Override
-	public List<EntregaHistorialDTO> listarHistorialPorCiudadano(Long ciudadanoId) {
-		return entregaRepository.findByCiudadanoId(ciudadanoId).stream().map(this::convertirADTO)
-				.collect(Collectors.toList());
-	}
+    // Método explícito para rechazar (útil desde controlador si quieres separar la ruta)
+    public EntregaValidadaDTO rechazarEntrega(Long entregaId, String motivoRechazo, String respuestaAdmin) {
+        Entrega entrega = entregaRepository.findById(entregaId)
+                .orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
 
-	private EntregaHistorialDTO convertirADTO(Entrega entrega) {
-		String ubicacion = null;
-		if (entrega.getPuntoVerde() != null) {
-			ubicacion = entrega.getPuntoVerde().getDireccion();
-		} else if (entrega.getCampania() != null) {
-			ubicacion = entrega.getCampania().getUbicacion();
-		}
-		return new EntregaHistorialDTO(entrega.getFechaEntrega(), entrega.getMaterial(), entrega.getCantidad(),
-				entrega.getPuntosGanados(), ubicacion);
-	}
+        entrega.setValidada(false);
+        entrega.setFechaValidacion(LocalDateTime.now());
+        entrega.setRespuestaAdmin(respuestaAdmin != null ? respuestaAdmin : "Entrega rechazada");
+        entrega.setObservaciones(motivoRechazo);
 
-	@Override
-	public Entrega subirEvidencias(Long entregaId, List<String> rutasEvidencias) {
-		return entregaRepository.findById(entregaId).map(entrega -> {
-			if (entrega.getEvidencias() == null) {
-				entrega.setEvidencias(new ArrayList<>());
-			}
-			entrega.getEvidencias().addAll(rutasEvidencias);
-			return entregaRepository.save(entrega);
-		}).orElseThrow(() -> new RuntimeException("Entrega no encontrada con id: " + entregaId));
-	}
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String rechazadoPor = (auth != null) ? auth.getName() : "Sistema";
+        entrega.setValidadoPor(rechazadoPor);
+
+        entregaRepository.save(entrega);
+
+        String rolUsuario = null;
+        if (entrega.getCiudadano() != null && !entrega.getCiudadano().getUsuarioRoles().isEmpty()) {
+            rolUsuario = entrega.getCiudadano().getUsuarioRoles().iterator().next().getRol().getRolNombre();
+        }
+
+        return new EntregaValidadaDTO(
+                entrega.getId(),
+                entrega.getMaterial(),
+                entrega.getCantidad(),
+                entrega.getPuntosGanados(),
+                entrega.isValidada(),
+                entrega.getRespuestaAdmin(),
+                entrega.getObservaciones(),
+                entrega.getFechaValidacion(),
+                entrega.getCiudadano() != null ? entrega.getCiudadano().getUsername() : null,
+                entrega.getPuntoVerde() != null ? entrega.getPuntoVerde().getDireccion() : null,
+                rolUsuario,
+                entrega.getValidadoPor()
+        );
+    }
+
+    @Override
+    public UltimaEntregaDTO obtenerUltimaEntregaPorCiudadano(Long ciudadanoId) {
+        Entrega ultima = entregaRepository.findTopByCiudadanoIdOrderByFechaEntregaDesc(ciudadanoId);
+        if (ultima == null) {
+            throw new EntregaNotFoundException("No se encontró última entrega para el ciudadano con id: " + ciudadanoId);
+        }
+        return new UltimaEntregaDTO(ultima.getMaterial(), ultima.getCantidad(), ultima.getFechaEntrega());
+    }
+
+    @Override
+    public List<EntregaHistorialDTO> listarHistorialPorCiudadano(Long ciudadanoId) {
+        return entregaRepository.findByCiudadanoId(ciudadanoId)
+                .stream()
+                .map(e -> new EntregaHistorialDTO(
+                        e.getFechaEntrega(),
+                        e.getMaterial(),
+                        e.getCantidad(),
+                        e.getPuntosGanados(),
+                        e.getPuntoVerde() != null ? e.getPuntoVerde().getDireccion() :
+                                (e.getCampania() != null ? e.getCampania().getUbicacion() : "Ubicación no registrada")
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Entrega subirEvidencias(Long entregaId, List<String> rutasEvidencias) {
+        return entregaRepository.findById(entregaId)
+                .map(entrega -> {
+                    if (entrega.getEvidencias() == null) {
+                        entrega.setEvidencias(new ArrayList<>());
+                    }
+                    entrega.getEvidencias().addAll(rutasEvidencias);
+                    return entregaRepository.save(entrega);
+                })
+                .orElseThrow(() -> new EntregaNotFoundException("Entrega no encontrada con id: " + entregaId));
+    }
 }
