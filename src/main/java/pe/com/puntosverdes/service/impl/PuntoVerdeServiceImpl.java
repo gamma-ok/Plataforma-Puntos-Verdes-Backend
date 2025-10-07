@@ -19,6 +19,19 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 	}
 
 	@Override
+	public PuntoVerde actualizarPuntoVerde(Long id, PuntoVerde datos) {
+		PuntoVerde existente = puntoVerdeRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con id: " + id));
+
+		existente.setNombre(datos.getNombre());
+		existente.setDireccion(datos.getDireccion());
+		existente.setDescripcion(datos.getDescripcion());
+		existente.setLatitud(datos.getLatitud());
+		existente.setLongitud(datos.getLongitud());
+		return puntoVerdeRepository.save(existente);
+	}
+
+	@Override
 	public PuntoVerde obtenerPorId(Long id) {
 		return puntoVerdeRepository.findById(id).orElse(null);
 	}
@@ -29,15 +42,20 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 	}
 
 	@Override
-	public void desactivarPuntoVerde(Long id) {
-		PuntoVerde puntoVerde = puntoVerdeRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con id: " + id));
-		puntoVerde.setActivo(false);
-		puntoVerdeRepository.save(puntoVerde);
+	public List<PuntoVerde> listarPorEstado(boolean activo) {
+		return activo ? puntoVerdeRepository.findByActivoTrue() : puntoVerdeRepository.findByActivoFalse();
 	}
 
 	@Override
-	public List<PuntoVerde> listarPuntosActivos() {
-		return puntoVerdeRepository.findByActivoTrue();
+	public List<PuntoVerde> buscarPorNombre(String nombre) {
+		return puntoVerdeRepository.findByNombreContainingIgnoreCase(nombre);
+	}
+
+	@Override
+	public PuntoVerde cambiarEstado(Long id, boolean activo) {
+		PuntoVerde punto = puntoVerdeRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con id: " + id));
+		punto.setActivo(activo);
+		return puntoVerdeRepository.save(punto);
 	}
 }

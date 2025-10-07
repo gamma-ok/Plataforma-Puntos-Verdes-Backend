@@ -4,6 +4,7 @@ public class PuntoVerdeDTO {
 	private Long id;
 	private String nombre;
 	private String direccion;
+	private String descripcion;
 	private Double latitud;
 	private Double longitud;
 	private boolean activo;
@@ -12,11 +13,12 @@ public class PuntoVerdeDTO {
 	public PuntoVerdeDTO() {
 	}
 
-	public PuntoVerdeDTO(Long id, String nombre, String direccion, Double latitud, Double longitud, boolean activo,
-			String creadoPor) {
+	public PuntoVerdeDTO(Long id, String nombre, String direccion, String descripcion, Double latitud, Double longitud,
+			boolean activo, String creadoPor) {
 		this.id = id;
 		this.nombre = nombre;
 		this.direccion = direccion;
+		this.descripcion = descripcion;
 		this.latitud = latitud;
 		this.longitud = longitud;
 		this.activo = activo;
@@ -45,6 +47,14 @@ public class PuntoVerdeDTO {
 
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
+	}
+
+	public String getDescripcion() {
+		return descripcion;
+	}
+
+	public void setDescripcion(String descripcion) {
+		this.descripcion = descripcion;
 	}
 
 	public Double getLatitud() {

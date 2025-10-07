@@ -17,6 +17,7 @@ public class PuntoVerde {
 
 	private String nombre;
 	private String direccion;
+	private String descripcion;
 	private Double latitud;
 	private Double longitud;
 	private boolean activo = true;
@@ -35,9 +36,11 @@ public class PuntoVerde {
 	public PuntoVerde() {
 	}
 
-	public PuntoVerde(String nombre, String direccion, Double latitud, Double longitud, Usuario creadoPor) {
+	public PuntoVerde(String nombre, String direccion, String descripcion, Double latitud, Double longitud,
+			Usuario creadoPor) {
 		this.nombre = nombre;
 		this.direccion = direccion;
+		this.descripcion = descripcion;
 		this.latitud = latitud;
 		this.longitud = longitud;
 		this.creadoPor = creadoPor;
@@ -67,6 +70,14 @@ public class PuntoVerde {
 
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
+	}
+
+	public String getDescripcion() {
+		return descripcion;
+	}
+
+	public void setDescripcion(String descripcion) {
+		this.descripcion = descripcion;
 	}
 
 	public Double getLatitud() {
