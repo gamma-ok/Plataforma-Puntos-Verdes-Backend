@@ -25,11 +25,9 @@ public class CampaniaController {
 	@Autowired
 	private UsuarioService usuarioService;
 
-	// CREAR NUEVA CAMPANIA
 	@PostMapping("/")
 	public ResponseEntity<Campania> crearCampania(@RequestBody Campania campania, Authentication authentication) {
 
-		// Obtener el usuario autenticado (ADMIN o MUNICIPALIDAD)
 		Usuario creador = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
 		campania.setCreadoPor(creador);
 
@@ -37,7 +35,6 @@ public class CampaniaController {
 		return ResponseEntity.ok(creada);
 	}
 
-	// LISTAR TODAS
 	@GetMapping("/")
 	public ResponseEntity<List<CampaniaDTO>> listar() {
 		List<CampaniaDTO> lista = campaniaService.listarCampanias().stream().map(CampaniaMapper::toDTO)
@@ -45,7 +42,6 @@ public class CampaniaController {
 		return ResponseEntity.ok(lista);
 	}
 
-	// LISTAR ACTIVAS
 	@GetMapping("/activas")
 	public ResponseEntity<List<CampaniaDTO>> listarActivas() {
 		List<CampaniaDTO> activas = campaniaService.listarCampaniasActivas().stream().map(CampaniaMapper::toDTO)
@@ -53,7 +49,6 @@ public class CampaniaController {
 		return ResponseEntity.ok(activas);
 	}
 
-	// DETALLE POR ID
 	@GetMapping("/{id}")
 	public ResponseEntity<CampaniaDetalleDTO> obtenerPorId(@PathVariable Long id) {
 		Campania campania = campaniaService.obtenerPorId(id);
@@ -63,14 +58,12 @@ public class CampaniaController {
 		return ResponseEntity.ok(CampaniaMapper.toDetalleDTO(campania));
 	}
 
-	// DESACTIVAR CAMPAÑA
 	@PutMapping("/{id}/desactivar")
 	public ResponseEntity<Void> desactivar(@PathVariable Long id) {
 		campaniaService.desactivarCampania(id);
 		return ResponseEntity.noContent().build();
 	}
 
-	// BUSCAR POR TÍTULO
 	@GetMapping("/buscar/titulo/{titulo}")
 	public ResponseEntity<List<CampaniaDTO>> buscarPorTitulo(@PathVariable String titulo) {
 		List<CampaniaDTO> resultados = campaniaService.buscarCampaniaPorTitulo(titulo).stream()
@@ -78,7 +71,6 @@ public class CampaniaController {
 		return ResponseEntity.ok(resultados);
 	}
 
-	// BUSCAR POR UBICACIÓN
 	@GetMapping("/buscar/ubicacion/{ubicacion}")
 	public ResponseEntity<List<CampaniaDTO>> buscarPorUbicacion(@PathVariable String ubicacion) {
 		List<CampaniaDTO> resultados = campaniaService.buscarCampaniaPorUbicacion(ubicacion).stream()

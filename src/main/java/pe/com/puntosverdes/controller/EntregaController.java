@@ -27,120 +27,145 @@ import java.util.*;
 @CrossOrigin("*")
 public class EntregaController {
 
-	@Autowired
-	private EntregaService entregaService;
+    @Autowired
+    private EntregaService entregaService;
 
-	@Autowired
-	private UsuarioService usuarioService;
+    @Autowired
+    private UsuarioService usuarioService;
 
-	// Ruta base para las subidas (definida en application.properties)
-	@Value("${upload.dir:uploads/entregas/}")
-	private String uploadDir;
+    @Value("${upload.dir:uploads/entregas/}")
+    private String uploadDir;
 
-	// CRUD BÁSICO
-	@PostMapping("/")
-	public ResponseEntity<Entrega> registrarEntrega(@RequestBody Entrega entrega, Authentication authentication) {
+    // Registrar una entrega
+    @PostMapping("/registrar")
+    public ResponseEntity<Entrega> registrarEntrega(@RequestBody Entrega entrega, Authentication authentication) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
+        entrega.setCiudadano(usuario);
+        return ResponseEntity.ok(entregaService.registrarEntrega(entrega));
+    }
 
-		// Obtener usuario logueado desde el token
-		Usuario ciudadano = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
-		entrega.setCiudadano(ciudadano); // asigna el ciudadano autenticado
+    // Listar TODAS las entregas (solo admin o municipalidad)
+    @GetMapping("/listar-todas")
+    public ResponseEntity<List<Entrega>> listarEntregas() {
+        return ResponseEntity.ok(entregaService.listarEntregas());
+    }
 
-		return ResponseEntity.ok(entregaService.registrarEntrega(entrega));
-	}
+    // Listar entregas por usuario (ya sea ciudadano o recolector)
+    @GetMapping("/usuario/{usuarioId}/listar")
+    public ResponseEntity<List<Entrega>> listarPorUsuario(@PathVariable Long usuarioId) {
+        List<Entrega> entregas = new ArrayList<>();
+        entregas.addAll(entregaService.listarEntregasPorCiudadano(usuarioId));
+        entregas.addAll(entregaService.listarEntregasPorRecolector(usuarioId));
+        return ResponseEntity.ok(entregas);
+    }
 
-	@GetMapping("/")
-	public ResponseEntity<List<Entrega>> listarEntregas() {
-		return ResponseEntity.ok(entregaService.listarEntregas());
-	}
+    // Listar solo entregas de ciudadanos
+    @GetMapping("/ciudadanos")
+    public ResponseEntity<List<Entrega>> listarEntregasDeCiudadanos() {
+        List<Entrega> entregas = entregaService.listarEntregas();
+        List<Entrega> filtradas = entregas.stream()
+                .filter(e -> e.getCiudadano() != null && e.getCiudadano().getUsuarioRoles().stream()
+                        .anyMatch(r -> r.getRol().getRolNombre().equalsIgnoreCase("ROLE_CIUDADANO")))
+                .toList();
+        return ResponseEntity.ok(filtradas);
+    }
 
-	@GetMapping("/ciudadano/{ciudadanoId}")
-	public ResponseEntity<List<Entrega>> listarPorCiudadano(@PathVariable Long ciudadanoId) {
-		return ResponseEntity.ok(entregaService.listarEntregasPorCiudadano(ciudadanoId));
-	}
+    // Listar solo entregas de recolectores
+    @GetMapping("/recolectores")
+    public ResponseEntity<List<Entrega>> listarEntregasDeRecolectores() {
+        List<Entrega> entregas = entregaService.listarEntregas();
+        List<Entrega> filtradas = entregas.stream()
+                .filter(e -> e.getRecolector() != null && e.getRecolector().getUsuarioRoles().stream()
+                        .anyMatch(r -> r.getRol().getRolNombre().equalsIgnoreCase("ROLE_RECOLECTOR")))
+                .toList();
+        return ResponseEntity.ok(filtradas);
+    }
 
-	@GetMapping("/recolector/{recolectorId}")
-	public ResponseEntity<List<Entrega>> listarPorRecolector(@PathVariable Long recolectorId) {
-		return ResponseEntity.ok(entregaService.listarEntregasPorRecolector(recolectorId));
-	}
+    // Ver detalle de una entrega específica
+    @GetMapping("/{entregaId}/detalle")
+    public ResponseEntity<Entrega> obtenerEntregaPorId(@PathVariable Long entregaId) {
+        return entregaService.listarEntregas().stream()
+                .filter(e -> e.getId().equals(entregaId))
+                .findFirst()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-	// VALIDAR ENTREGA
-	@PutMapping("/{id}/validar")
-	public ResponseEntity<EntregaValidadaDTO> validarEntrega(@PathVariable Long id,
-			@RequestBody EntregaValidacionDTO dto, Authentication authentication) {
+    // Validar entrega (Admin o Municipalidad)
+    @PutMapping("/{id}/validar")
+    public ResponseEntity<EntregaValidadaDTO> validarEntrega(@PathVariable Long id,
+                                                             @RequestBody EntregaValidacionDTO dto,
+                                                             Authentication authentication) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
+        EntregaValidadaDTO entrega = entregaService.validarEntrega(
+                id,
+                dto.isValidada(),
+                dto.getPuntosGanados(),
+                dto.getRespuestaAdmin(),
+                dto.getObservaciones(),
+                usuario.getId()
+        );
+        return ResponseEntity.ok(entrega);
+    }
 
-		Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
+    // Última entrega del usuario
+    @GetMapping("/usuario/{usuarioId}/ultima")
+    public ResponseEntity<UltimaEntregaDTO> ultimaEntrega(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(entregaService.obtenerUltimaEntregaPorCiudadano(usuarioId));
+    }
 
-		EntregaValidadaDTO entrega = entregaService.validarEntrega(id, dto.isValidada(), dto.getPuntosGanados(),
-				dto.getRespuestaAdmin(), dto.getObservaciones(), usuario.getId());
+    // Historial de entregas del usuario
+    @GetMapping("/usuario/{usuarioId}/historial")
+    public ResponseEntity<List<EntregaHistorialDTO>> historial(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(entregaService.listarHistorialPorCiudadano(usuarioId));
+    }
 
-		return ResponseEntity.ok(entrega);
-	}
+    // Subir evidencias (Ciudadano o Recolector)
+    @PostMapping("/{id}/evidencias")
+    public ResponseEntity<Map<String, Object>> subirEvidencias(@PathVariable Long id,
+                                                               @RequestParam("files") List<MultipartFile> files) {
+        try {
+            File directory = new File(uploadDir);
+            if (!directory.exists()) directory.mkdirs();
 
-	// HISTORIAL Y ULTIMA ENTREGA
-	@GetMapping("/ciudadano/{ciudadanoId}/ultima")
-	public ResponseEntity<UltimaEntregaDTO> ultimaEntrega(@PathVariable Long ciudadanoId) {
-		return ResponseEntity.ok(entregaService.obtenerUltimaEntregaPorCiudadano(ciudadanoId));
-	}
+            List<String> rutasEvidencias = new ArrayList<>();
+            for (MultipartFile file : files) {
+                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                String filePath = uploadDir + File.separator + fileName;
+                file.transferTo(new File(filePath));
+                rutasEvidencias.add(filePath);
+            }
 
-	@GetMapping("/ciudadano/{ciudadanoId}/historial")
-	public ResponseEntity<List<EntregaHistorialDTO>> historial(@PathVariable Long ciudadanoId) {
-		return ResponseEntity.ok(entregaService.listarHistorialPorCiudadano(ciudadanoId));
-	}
+            Entrega actualizada = entregaService.subirEvidencias(id, rutasEvidencias);
+            Map<String, Object> response = new HashMap<>();
+            response.put("entregaId", actualizada.getId());
+            response.put("evidencias", rutasEvidencias);
 
-	// SUBIR EVIDENCIAS
-	@PostMapping("/{id}/evidencias")
-	public ResponseEntity<Map<String, Object>> subirEvidencias(@PathVariable Long id,
-			@RequestParam("files") List<MultipartFile> files) {
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
 
-		try {
-			// Crear carpeta si no existe
-			File directory = new File(uploadDir);
-			if (!directory.exists()) {
-				directory.mkdirs();
-			}
+    // Ver evidencia (público)
+    @GetMapping("/evidencias/{fileName:.+}")
+    public ResponseEntity<Resource> verEvidencia(@PathVariable String fileName) {
+        try {
+            Path filePath = Paths.get(uploadDir + File.separator + fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
 
-			List<String> rutasEvidencias = new ArrayList<>();
-			for (MultipartFile file : files) {
-				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-				String filePath = uploadDir + File.separator + fileName;
-
-				File dest = new File(filePath);
-				file.transferTo(dest);
-
-				rutasEvidencias.add(filePath);
-			}
-
-			// Registrar rutas en la base de datos
-			Entrega actualizada = entregaService.subirEvidencias(id, rutasEvidencias);
-
-			Map<String, Object> response = new HashMap<>();
-			response.put("entregaId", actualizada.getId());
-			response.put("evidencias", rutasEvidencias);
-
-			return ResponseEntity.ok(response);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-		}
-	}
-
-	// VISUALIZAR EVIDENCIAS
-	@GetMapping("/evidencias/{fileName:.+}")
-	public ResponseEntity<Resource> verEvidencia(@PathVariable String fileName) {
-		try {
-			Path filePath = Paths.get(uploadDir + File.separator + fileName).normalize();
-			Resource resource = new UrlResource(filePath.toUri());
-
-			if (resource.exists()) {
-				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
-						.header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
-						.body(resource);
-			} else {
-				return ResponseEntity.notFound().build();
-			}
-		} catch (MalformedURLException e) {
-			return ResponseEntity.status(500).build();
-		}
-	}
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

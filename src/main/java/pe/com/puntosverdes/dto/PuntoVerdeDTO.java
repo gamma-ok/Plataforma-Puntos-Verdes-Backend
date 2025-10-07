@@ -23,7 +23,6 @@ public class PuntoVerdeDTO {
 		this.creadoPor = creadoPor;
 	}
 
-	// Getters & Setters
 	public Long getId() {
 		return id;
 	}
