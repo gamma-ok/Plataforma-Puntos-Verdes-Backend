@@ -3,6 +3,7 @@ package pe.com.puntosverdes.dto;
 import java.time.LocalDateTime;
 
 public class EntregaHistorialDTO {
+
 	private LocalDateTime fechaEntrega;
 	private String material;
 	private double cantidad;
@@ -18,7 +19,6 @@ public class EntregaHistorialDTO {
 		this.ubicacion = ubicacion;
 	}
 
-	// Getters y setters
 	public LocalDateTime getFechaEntrega() {
 		return fechaEntrega;
 	}

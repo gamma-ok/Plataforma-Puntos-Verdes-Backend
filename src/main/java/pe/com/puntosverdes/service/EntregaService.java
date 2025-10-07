@@ -11,7 +11,7 @@ public interface EntregaService {
     List<EntregaListadoDTO> listarEntregasPorEstado(String estado); // 🔹 Añadido
     EntregaValidadaDTO validarEntrega(Long entregaId, boolean validada, int puntosGanados,
                                        String respuestaAdmin, String observaciones, Long recolectorId);
-    EntregaValidadaDTO rechazarEntrega(Long entregaId, String motivoRechazo, String respuestaAdmin); // 🔹 Añadido también
+    EntregaValidadaDTO rechazarEntrega(Long entregaId, String motivoRechazo, String respuestaAdmin);
     UltimaEntregaDTO obtenerUltimaEntregaPorCiudadano(Long ciudadanoId);
     List<EntregaHistorialDTO> listarHistorialPorCiudadano(Long ciudadanoId);
     Entrega subirEvidencias(Long entregaId, List<String> rutasEvidencias);
