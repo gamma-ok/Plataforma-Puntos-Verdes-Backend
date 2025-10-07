@@ -2,8 +2,9 @@ package pe.com.puntosverdes.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import pe.com.puntosverdes.dto.CanjeDTO;
 import pe.com.puntosverdes.dto.CanjeResolucionDTO;
 import pe.com.puntosverdes.dto.CanjeSolicitudDTO;
 import pe.com.puntosverdes.model.Canje;
@@ -14,6 +15,7 @@ import pe.com.puntosverdes.service.NotificacionService;
 import pe.com.puntosverdes.service.RecompensaService;
 import pe.com.puntosverdes.service.UsuarioService;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/canjes")
@@ -32,36 +34,30 @@ public class CanjeController {
 	@Autowired
 	private NotificacionService notificacionService;
 
-	// Solicitar canje (CIUDADANO)
 	@PostMapping("/solicitar")
 	public ResponseEntity<?> solicitarCanje(@RequestBody CanjeSolicitudDTO dto, Authentication authentication) {
-		// Obtener usuario autenticado desde el token JWT
 		Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
 		Recompensa recompensa = recompensaService.obtenerPorId(dto.getRecompensaId());
 
-		if (recompensa == null) {
+		if (recompensa == null)
 			return ResponseEntity.badRequest().body("Recompensa no encontrada");
-		}
 
-		if (!recompensa.isActivo()) {
+		if (!recompensa.isActivo())
 			return ResponseEntity.badRequest().body("Recompensa no disponible");
-		}
 
-		if (usuario.getPuntosAcumulados() < recompensa.getPuntosNecesarios()) {
+		if (usuario.getPuntosAcumulados() < recompensa.getPuntosNecesarios())
 			return ResponseEntity.badRequest().body("No tienes puntos suficientes");
-		}
 
 		Canje canje = canjeService.crearCanje(usuario, recompensa);
 
-		// Notificación
 		notificacionService.crearNotificacion(new pe.com.puntosverdes.model.Notificacion("Canje solicitado",
 				"Tu canje de '" + recompensa.getNombre() + "' fue enviado y está pendiente de revisión.", usuario,
 				false));
 
-		return ResponseEntity.ok(canje);
+		CanjeDTO dtoRespuesta = convertirADTO(canje);
+		return ResponseEntity.ok(dtoRespuesta);
 	}
 
-	// Aprobar canje (ADMIN o MUNICIPALIDAD)
 	@PutMapping("/{canjeId}/resolver")
 	public ResponseEntity<?> resolverCanje(@PathVariable Long canjeId, @RequestBody CanjeResolucionDTO dto) {
 		Canje canje;
@@ -82,34 +78,50 @@ public class CanjeController {
 							canje.getUsuario(), false));
 		}
 
-		return ResponseEntity.ok(canje);
+		CanjeDTO dtoRespuesta = convertirADTO(canje);
+		return ResponseEntity.ok(dtoRespuesta);
 	}
 
-	// Listar todos (ADMIN)
 	@GetMapping("/")
-	public ResponseEntity<List<Canje>> listarTodos() {
-		return ResponseEntity.ok(canjeService.listarCanjes());
+	public ResponseEntity<List<CanjeDTO>> listarTodos() {
+		List<CanjeDTO> lista = canjeService.listarCanjes().stream().map(this::convertirADTO)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(lista);
 	}
 
-	// Listar canjes de un usuario (Ciudadano)
 	@GetMapping("/usuario/{usuarioId}")
-	public ResponseEntity<List<Canje>> listarPorUsuario(@PathVariable Long usuarioId) {
-		return ResponseEntity.ok(canjeService.listarPorUsuario(usuarioId));
+	public ResponseEntity<List<CanjeDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
+		List<CanjeDTO> lista = canjeService.listarPorUsuario(usuarioId).stream().map(this::convertirADTO)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(lista);
 	}
 
-	// Obtener canje por id
 	@GetMapping("/{id}")
-	public ResponseEntity<Canje> obtenerPorId(@PathVariable Long id) {
+	public ResponseEntity<CanjeDTO> obtenerPorId(@PathVariable Long id) {
 		Canje canje = canjeService.obtenerPorId(id);
-		return canje != null ? ResponseEntity.ok(canje) : ResponseEntity.notFound().build();
+		if (canje == null)
+			return ResponseEntity.notFound().build();
+
+		return ResponseEntity.ok(convertirADTO(canje));
 	}
 
 	@GetMapping("/buscar")
-	public ResponseEntity<List<Canje>> buscarCanjes(@RequestParam(required = false) String estado,
+	public ResponseEntity<List<CanjeDTO>> buscarCanjes(@RequestParam(required = false) String estado,
 			@RequestParam(required = false) String fechaInicio, @RequestParam(required = false) String fechaFin,
 			@RequestParam(required = false) Long usuarioId) {
 
-		List<Canje> resultados = canjeService.buscarCanjes(estado, fechaInicio, fechaFin, usuarioId);
+		List<CanjeDTO> resultados = canjeService.buscarCanjes(estado, fechaInicio, fechaFin, usuarioId).stream()
+				.map(this::convertirADTO).collect(Collectors.toList());
+
 		return ResponseEntity.ok(resultados);
+	}
+
+	private CanjeDTO convertirADTO(Canje canje) {
+		return new CanjeDTO(canje.getId(), canje.getEstado(),
+				canje.getRecompensa() != null ? canje.getRecompensa().getNombre() : "N/A",
+				canje.getUsuario() != null ? (canje.getUsuario().getNombre() + " " + canje.getUsuario().getApellido())
+						: "Desconocido",
+				canje.getPuntosUsados(), canje.getFechaSolicitud(), canje.getFechaResolucion(),
+				canje.getRespuestaAdmin(), canje.getMotivoRechazo());
 	}
 }
