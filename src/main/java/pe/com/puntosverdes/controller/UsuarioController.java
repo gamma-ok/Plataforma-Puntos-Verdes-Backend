@@ -23,140 +23,215 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 public class UsuarioController {
 
-	@Autowired
-	private UsuarioService usuarioService;
+    @Autowired
+    private UsuarioService usuarioService;
 
-	@Value("${upload.perfiles.dir}")
-	private String uploadPerfilesDir;
+    @Value("${upload.perfiles.dir}")
+    private String uploadPerfilesDir;
 
-	// Registrar usuario (público)
-	@PostMapping("/registrar")
-	public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
-		usuario.setPerfil("default.png");
-		Usuario creado = usuarioService.crearUsuario(usuario);
-		return ResponseEntity.ok(usuarioService.convertirADTO(creado));
-	}
+    // Registrar usuario (público)
+    @PostMapping("/registrar")
+    public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
+        usuario.setPerfil("default.png");
+        Usuario creado = usuarioService.crearUsuario(usuario);
+        return ResponseEntity.ok(usuarioService.convertirADTO(creado));
+    }
 
-	// Listar todos los usuarios
-	@GetMapping("/listar")
-	public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
-		return ResponseEntity.ok(usuarioService.listarUsuarios().stream().map(usuarioService::convertirADTO)
-				.collect(Collectors.toList()));
-	}
+    // Listar todos los usuarios
+    @GetMapping("/listar")
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
+        return ResponseEntity.ok(usuarioService.listarUsuarios()
+                .stream()
+                .map(usuarioService::convertirADTO)
+                .collect(Collectors.toList()));
+    }
 
-	// Listar por estado (activo/inactivo)
-	@GetMapping("/listar/{estado}")
-	public ResponseEntity<List<UsuarioDTO>> listarPorEstado(@PathVariable boolean estado) {
-		List<UsuarioDTO> usuarios = usuarioService.listarUsuariosPorEstado(estado).stream()
-				.map(usuarioService::convertirADTO).collect(Collectors.toList());
-		return ResponseEntity.ok(usuarios);
-	}
+    // Listar por estado (activo/inactivo)
+    @GetMapping("/listar/{estado}")
+    public ResponseEntity<List<UsuarioDTO>> listarPorEstado(@PathVariable boolean estado) {
+        List<UsuarioDTO> usuarios = usuarioService.listarUsuariosPorEstado(estado)
+                .stream()
+                .map(usuarioService::convertirADTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(usuarios);
+    }
 
-	// Listar por rol
-	@GetMapping("/listar/rol/{rol}")
-	public ResponseEntity<List<UsuarioDTO>> listarPorRol(@PathVariable String rol) {
-		return ResponseEntity.ok(usuarioService.listarUsuariosPorRol(rol).stream().map(usuarioService::convertirADTO)
-				.collect(Collectors.toList()));
-	}
+    // Listar por rol
+    @GetMapping("/listar/rol/{rol}")
+    public ResponseEntity<List<UsuarioDTO>> listarPorRol(@PathVariable String rol) {
+        return ResponseEntity.ok(usuarioService.listarUsuariosPorRol(rol)
+                .stream()
+                .map(usuarioService::convertirADTO)
+                .collect(Collectors.toList()));
+    }
 
-	// Obtener perfil propio (JWT)
-	@GetMapping("/perfil/mi")
-	public ResponseEntity<UsuarioPerfilDTO> miPerfil(Authentication auth) {
-		Usuario usuario = usuarioService.obtenerUsuarioPorUsername(auth.getName());
-		Set<String> roles = usuario.getUsuarioRoles().stream().map(ur -> ur.getRol().getRolNombre())
-				.collect(Collectors.toSet());
+    // Buscar usuario por ID
+    @GetMapping("/buscar/id/{id}")
+    public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
+        return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
+    }
 
-		UsuarioPerfilDTO dto = new UsuarioPerfilDTO(usuario.getUsername(), usuario.getNombre(), usuario.getApellido(),
-				usuario.getEmail(), usuario.getCelular(), usuario.getPerfil(), roles, usuario.getPuntosAcumulados(),
-				usuario.getFechaRegistro());
+    // Buscar usuario por username
+    @GetMapping("/buscar/username/{username}")
+    public ResponseEntity<UsuarioDTO> buscarPorUsername(@PathVariable String username) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
+        return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
+    }
 
-		return ResponseEntity.ok(dto);
-	}
+    // Buscar usuario por email
+    @GetMapping("/buscar/email/{email}")
+    public ResponseEntity<UsuarioDTO> buscarPorEmail(@PathVariable String email) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
+        return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
+    }
 
-	// Actualizar datos personales (usuario autenticado)
-	@PutMapping("/{id}/actualizar")
-	public ResponseEntity<UsuarioDTO> actualizarDatos(@PathVariable Long id, @RequestBody Usuario usuarioActualizado) {
-		Usuario actualizado = usuarioService.actualizarUsuario(id, usuarioActualizado);
-		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
-	}
+    // Buscar usuarios por número de celular
+    @GetMapping("/buscar/celular/{celular}")
+    public ResponseEntity<List<UsuarioDTO>> buscarPorCelular(@PathVariable String celular) {
+        List<UsuarioDTO> usuarios = usuarioService.obtenerUsuariosPorCelular(celular)
+                .stream()
+                .map(usuarioService::convertirADTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(usuarios);
+    }
 
-	// Subir o actualizar foto de perfil (usuario o admin)
-	@PostMapping("/{id}/perfil")
-	public ResponseEntity<UsuarioDTO> subirFotoPerfil(@PathVariable Long id,
-			@RequestParam("imagen") MultipartFile imagen) throws IOException {
+    // Obtener perfil propio (JWT)
+    @GetMapping("/perfil/mi")
+    public ResponseEntity<UsuarioPerfilDTO> miPerfil(Authentication auth) {
+        Usuario usuario = usuarioService.obtenerUsuarioPorUsername(auth.getName());
+        Set<String> roles = usuario.getUsuarioRoles().stream()
+                .map(ur -> ur.getRol().getRolNombre())
+                .collect(Collectors.toSet());
 
-		if (imagen.isEmpty()) {
-			throw new IllegalArgumentException("No se recibió ninguna imagen.");
-		}
+        UsuarioPerfilDTO dto = new UsuarioPerfilDTO(
+                usuario.getUsername(),
+                usuario.getNombre(),
+                usuario.getApellido(),
+                usuario.getEmail(),
+                usuario.getCelular(),
+                usuario.getPerfil(),
+                roles,
+                usuario.getPuntosAcumulados(),
+                usuario.getFechaRegistro()
+        );
 
-		File directorio = new File(uploadPerfilesDir);
-		if (!directorio.exists())
-			directorio.mkdirs();
+        return ResponseEntity.ok(dto);
+    }
 
-		Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
+    // Actualizar datos personales (usuario autenticado)
+    @PutMapping("/{id}/actualizar")
+    public ResponseEntity<UsuarioDTO> actualizarDatos(
+            @PathVariable Long id,
+            @RequestBody Usuario usuarioActualizado
+    ) {
+        Usuario actualizado = usuarioService.actualizarUsuario(id, usuarioActualizado);
+        return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
+    }
 
-		// Eliminar foto anterior si no es la predeterminada
-		if (usuario.getPerfil() != null && !usuario.getPerfil().equals("default.png")) {
-			File archivoAntiguo = new File(uploadPerfilesDir + usuario.getPerfil());
-			if (archivoAntiguo.exists())
-				archivoAntiguo.delete();
-		}
+    // Subir o actualizar foto de perfil (usuario o admin)
+    @PostMapping("/{id}/perfil")
+    public ResponseEntity<UsuarioDTO> subirFotoPerfil(
+            @PathVariable Long id,
+            @RequestParam("imagen") MultipartFile imagen
+    ) throws IOException {
 
-		String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
-		File archivoDestino = new File(uploadPerfilesDir + nombreArchivo);
-		imagen.transferTo(archivoDestino);
+        if (imagen.isEmpty()) {
+            throw new IllegalArgumentException("No se recibió ninguna imagen.");
+        }
 
-		Usuario actualizado = usuarioService.actualizarPerfil(id, nombreArchivo);
-		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
-	}
+        File directorio = new File(uploadPerfilesDir);
+        if (!directorio.exists()) directorio.mkdirs();
 
-	// Cambiar contraseña (solo ADMIN)
-	@PutMapping("/{id}/cambiar-contrasena")
-	public ResponseEntity<UsuarioDTO> cambiarContrasena(@PathVariable Long id,
-			@RequestBody Map<String, String> request) {
-		Usuario actualizado = usuarioService.cambiarContrasena(id, request.get("nuevaContrasena"));
-		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
-	}
+        Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
 
-	// Cambiar estado activo/inactivo (solo ADMIN)
-	@PutMapping("/{id}/estado/{activo}")
-	public ResponseEntity<UsuarioDTO> cambiarEstado(@PathVariable Long id, @PathVariable boolean activo) {
-		Usuario actualizado = usuarioService.actualizarEstado(id, activo);
-		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
-	}
+        // Eliminar foto anterior si no es la predeterminada
+        if (usuario.getPerfil() != null && !usuario.getPerfil().equals("default.png")) {
+            File archivoAntiguo = new File(uploadPerfilesDir + usuario.getPerfil());
+            if (archivoAntiguo.exists()) archivoAntiguo.delete();
+        }
 
-	// Asignar rol (solo ADMIN)
-	@PutMapping("/{id}/asignar-rol")
-	public ResponseEntity<UsuarioDTO> asignarRol(@PathVariable Long id, @RequestBody Map<String, String> request) {
-		Usuario actualizado = usuarioService.asignarRol(id, request.get("nuevoRol"));
-		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
-	}
+        String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
+        File archivoDestino = new File(uploadPerfilesDir + nombreArchivo);
+        imagen.transferTo(archivoDestino);
 
-	// Ajustar puntos (solo ADMIN/MUNICIPALIDAD)
-	@PutMapping("/{id}/ajustar-puntos")
-	public ResponseEntity<UsuarioDTO> ajustarPuntos(@PathVariable Long id, @RequestBody AjustePuntosRequest request,
-			Authentication auth) {
-		Usuario actualizado = usuarioService.ajustarPuntos(id, request.getAccion(), request.getCantidad(),
-				request.getMotivo(), auth.getName());
-		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
-	}
+        Usuario actualizado = usuarioService.actualizarPerfil(id, nombreArchivo);
+        return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
+    }
 
-	// Eliminar usuario (solo ADMIN)
-	@DeleteMapping("/eliminar/{id}")
-	public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
-		usuarioService.eliminarUsuario(id);
-		return ResponseEntity.noContent().build();
-	}
+    // Cambiar contraseña (solo ADMIN)
+    @PutMapping("/{id}/cambiar-contrasena")
+    public ResponseEntity<UsuarioDTO> cambiarContrasena(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request
+    ) {
+        Usuario actualizado = usuarioService.cambiarContrasena(id, request.get("nuevaContrasena"));
+        return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
+    }
 
-	// Estadísticas
-	@GetMapping("/estadisticas")
-	public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
-		return ResponseEntity.ok(usuarioService.obtenerEstadisticasUsuarios());
-	}
+    // Cambiar estado activo/inactivo (solo ADMIN)
+    @PutMapping("/{id}/estado/{activo}")
+    public ResponseEntity<UsuarioDTO> cambiarEstado(
+            @PathVariable Long id,
+            @PathVariable boolean activo
+    ) {
+        Usuario actualizado = usuarioService.actualizarEstado(id, activo);
+        return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
+    }
 
-	// Ranking
-	@GetMapping("/ranking")
-	public ResponseEntity<List<Usuario>> ranking() {
-		return ResponseEntity.ok(usuarioService.obtenerRankingUsuarios());
-	}
+    // Asignar rol (solo ADMIN)
+    @PutMapping("/{id}/asignar-rol")
+    public ResponseEntity<UsuarioDTO> asignarRol(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request
+    ) {
+        Usuario actualizado = usuarioService.asignarRol(id, request.get("nuevoRol"));
+        return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
+    }
+
+    // Ajustar puntos (solo ADMIN/MUNICIPALIDAD)
+    @PutMapping("/{id}/ajustar-puntos")
+    public ResponseEntity<UsuarioDTO> ajustarPuntos(
+            @PathVariable Long id,
+            @RequestBody AjustePuntosRequest request,
+            Authentication auth
+    ) {
+        Usuario actualizado = usuarioService.ajustarPuntos(
+                id,
+                request.getAccion(),
+                request.getCantidad(),
+                request.getMotivo(),
+                auth.getName()
+        );
+        return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
+    }
+
+    // Eliminar usuario (solo ADMIN)
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
+        usuarioService.eliminarUsuario(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Estadísticas
+    @GetMapping("/estadisticas")
+    public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
+        return ResponseEntity.ok(usuarioService.obtenerEstadisticasUsuarios());
+    }
+
+    // Ranking
+    @GetMapping("/ranking")
+    public ResponseEntity<List<Usuario>> ranking() {
+        return ResponseEntity.ok(usuarioService.obtenerRankingUsuarios());
+    }
+    
+    // Actualizar datos de cualquier usuario (solo ADMIN)
+    @PutMapping("/{id}/actualizar-admin")
+    public ResponseEntity<UsuarioDTO> actualizarUsuarioPorAdmin(
+            @PathVariable Long id,
+            @RequestBody Usuario usuarioActualizado
+    ) {
+        Usuario actualizado = usuarioService.actualizarUsuario(id, usuarioActualizado);
+        return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
+    }
 }

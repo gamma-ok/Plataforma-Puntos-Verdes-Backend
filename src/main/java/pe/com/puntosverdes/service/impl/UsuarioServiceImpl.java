@@ -75,6 +75,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 		return usuarioRepository.findByEmail(email)
 				.orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con email: " + email));
 	}
+	
 
 	@Override
 	public List<Usuario> obtenerUsuariosPorCelular(String celular) {
@@ -204,7 +205,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 		int puntosActuales = usuario.getPuntosAcumulados();
 		int nuevosPuntos = puntosActuales;
 
-		switch (accion.toLowerCase()) {
+		switch (accion.toUpperCase()) {
 		case "SUMAR":
 			nuevosPuntos += cantidad;
 			break;
