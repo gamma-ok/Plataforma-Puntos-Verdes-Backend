@@ -29,6 +29,36 @@ public class UsuarioController {
 		Usuario creado = usuarioService.crearUsuario(usuario);
 		return ResponseEntity.ok(usuarioService.convertirADTO(creado));
 	}
+	
+	// Buscar usuario por ID
+	@GetMapping("/buscar/{id}")
+	public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
+	    Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
+	    return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
+	}
+
+	// Buscar usuario por username
+	@GetMapping("/buscar/username/{username}")
+	public ResponseEntity<UsuarioDTO> buscarPorUsername(@PathVariable String username) {
+	    Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
+	    return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
+	}
+
+	// Buscar usuario por email
+	@GetMapping("/buscar/email/{email}")
+	public ResponseEntity<UsuarioDTO> buscarPorEmail(@PathVariable String email) {
+	    Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
+	    return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
+	}
+
+	// Buscar usuario por celular
+	@GetMapping("/buscar/celular/{celular}")
+	public ResponseEntity<List<UsuarioDTO>> buscarPorCelular(@PathVariable String celular) {
+	    List<UsuarioDTO> usuarios = usuarioService.obtenerUsuariosPorCelular(celular)
+	            .stream().map(usuarioService::convertirADTO)
+	            .collect(Collectors.toList());
+	    return ResponseEntity.ok(usuarios);
+	}
 
 	// Listar todos los usuarios
 	@GetMapping("/listar")
@@ -104,7 +134,7 @@ public class UsuarioController {
 	}
 
 	// Eliminar usuario (solo ADMIN)
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/eliminar/{id}")
 	public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
 		usuarioService.eliminarUsuario(id);
 		return ResponseEntity.noContent().build();
@@ -120,5 +150,14 @@ public class UsuarioController {
 	@GetMapping("/ranking")
 	public ResponseEntity<List<Usuario>> ranking() {
 		return ResponseEntity.ok(usuarioService.obtenerRankingUsuarios());
+	}
+	
+	// Actualizar datos de un usuario (solo ADMIN/MUNICIPALIDAD)
+	@PutMapping("/{id}/actualizar-admin")
+	public ResponseEntity<UsuarioDTO> actualizarPorAdmin(
+	        @PathVariable Long id,
+	        @RequestBody Usuario usuarioActualizado) {
+	    Usuario actualizado = usuarioService.actualizarUsuario(id, usuarioActualizado);
+	    return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
 	}
 }
