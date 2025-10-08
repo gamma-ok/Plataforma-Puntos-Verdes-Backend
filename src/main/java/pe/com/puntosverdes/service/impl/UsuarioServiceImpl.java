@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import pe.com.puntosverdes.dto.UsuarioDTO;
 import pe.com.puntosverdes.exception.UsuarioFoundException;
 import pe.com.puntosverdes.exception.UsuarioNotFoundException;
+import pe.com.puntosverdes.model.AjustePuntos;
 import pe.com.puntosverdes.model.Rol;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.model.UsuarioRol;
+import pe.com.puntosverdes.repository.AjustePuntosRepository;
 import pe.com.puntosverdes.repository.RolRepository;
 import pe.com.puntosverdes.repository.UsuarioRepository;
 import pe.com.puntosverdes.service.UsuarioService;
@@ -26,6 +28,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private AjustePuntosRepository ajustePuntosRepository;
 
 	@Override
 	public Usuario crearUsuario(Usuario usuario) {
@@ -83,9 +88,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 	@Override
 	public List<Usuario> listarUsuariosPorEstado(boolean estado) {
-	    return usuarioRepository.findAll().stream()
-	            .filter(u -> u.isEnabled() == estado)
-	            .collect(Collectors.toList());
+		return usuarioRepository.findAll().stream().filter(u -> u.isEnabled() == estado).collect(Collectors.toList());
 	}
 
 	@Override
@@ -191,5 +194,38 @@ public class UsuarioServiceImpl implements UsuarioService {
 		stats.put("porRol", porRol);
 
 		return stats;
+	}
+
+	@Override
+	public Usuario ajustarPuntos(Long idUsuario, String accion, int cantidad, String motivo, String realizadoPor) {
+		Usuario usuario = usuarioRepository.findById(idUsuario)
+				.orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + idUsuario));
+
+		int puntosActuales = usuario.getPuntosAcumulados();
+		int nuevosPuntos = puntosActuales;
+
+		switch (accion.toLowerCase()) {
+		case "SUMAR":
+			nuevosPuntos += cantidad;
+			break;
+		case "RESTAR":
+			nuevosPuntos -= cantidad;
+			if (nuevosPuntos < 0)
+				nuevosPuntos = 0;
+			break;
+		case "ESTABLECER":
+			nuevosPuntos = cantidad;
+			break;
+		default:
+			throw new IllegalArgumentException("Acción no valida. Usa: SUMAR, RESTAR o ESTABLECER.");
+		}
+
+		usuario.setPuntosAcumulados(nuevosPuntos);
+		usuarioRepository.save(usuario);
+
+		AjustePuntos registro = new AjustePuntos(idUsuario, realizadoPor, accion, cantidad, motivo);
+		ajustePuntosRepository.save(registro);
+
+		return usuario;
 	}
 }

@@ -21,6 +21,7 @@ public interface UsuarioService {
     Usuario actualizarEstado(Long id, boolean activo);
     void eliminarUsuario(Long id);
     Usuario asignarRol(Long idUsuario, String nuevoRol);
+    Usuario ajustarPuntos(Long idUsuario, String accion, int cantidad, String motivo, String realizadoPor);
     UsuarioDTO convertirADTO(Usuario usuario);
     Map<String, Object> obtenerEstadisticasUsuarios();
 }

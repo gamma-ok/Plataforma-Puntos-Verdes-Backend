@@ -56,45 +56,52 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable()).authorizeHttpRequests(auth -> auth
 
-				// --- Rutas públicas ---
+				// Rutas Públicas
 				.requestMatchers("/auth/**").permitAll().requestMatchers("/api/usuarios/registrar").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/entregas/evidencias/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/incidencias/evidencias/**").permitAll()
 
-				// --- CANJES ---
+				// CANJES
 				.requestMatchers(HttpMethod.POST, "/api/canjes/solicitar").hasAnyRole("CIUDADANO", "RECOLECTOR")
 				.requestMatchers(HttpMethod.PUT, "/api/canjes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/canjes/**").authenticated()
 
-				// --- GESTIÓN DE USUARIOS ---
-				.requestMatchers("/api/usuarios/{id}/asignar-rol").hasRole("ADMIN")
+				// GESTIÓN DE USUARIOS
+				.requestMatchers(HttpMethod.POST, "/api/usuarios/registrar").permitAll()
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/{id}/ajustar-puntos").hasAnyRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/{id}/asignar-rol").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/{id}/cambiar-contrasena").hasAnyRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/{id}/estado/**").hasAnyRole("ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/perfil/mi").authenticated()
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-				// --- ENTREGAS ---
+				// ENTREGAS
 				.requestMatchers(HttpMethod.POST, "/api/entregas/**").hasAnyRole("CIUDADANO", "RECOLECTOR")
 				.requestMatchers(HttpMethod.PUT, "/api/entregas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/entregas/**").authenticated()
 
-				// --- INCIDENCIAS ---
+				// INCIDENCIAS 
 				.requestMatchers(HttpMethod.POST, "/api/incidencias/{id}/evidencias").hasRole("RECOLECTOR")
 				.requestMatchers(HttpMethod.POST, "/api/incidencias/**").hasRole("RECOLECTOR")
 				.requestMatchers(HttpMethod.PUT, "/api/incidencias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/incidencias/**")
 				.hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR")
 
-				// --- PUNTOS VERDES ---
+				// PUNTOS VERDES
 				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.PUT, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-				// --- CAMPAÑAS ---
+				// CAMPANIAS
 				.requestMatchers(HttpMethod.GET, "/api/campanias/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.PUT, "/api/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-				// --- DASHBOARD ---
+				// DASHBOARD
 				.requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
-				// --- Cualquier otra ruta requiere autenticación ---
+				// Cualquier otra ruta requiere autenticación
 				.anyRequest().authenticated()).exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
