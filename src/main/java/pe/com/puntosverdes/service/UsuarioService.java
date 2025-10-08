@@ -3,6 +3,7 @@ package pe.com.puntosverdes.service;
 import pe.com.puntosverdes.dto.UsuarioDTO;
 import pe.com.puntosverdes.model.Usuario;
 import java.util.List;
+import java.util.Map;
 
 public interface UsuarioService {
     Usuario crearUsuario(Usuario usuario);
@@ -12,13 +13,14 @@ public interface UsuarioService {
     List<Usuario> obtenerUsuariosPorCelular(String celular);
     List<Usuario> listarUsuarios();
     List<Usuario> listarUsuariosPorRol(String rolNombre);
+    List<Usuario> listarUsuariosPorEstado(boolean estado);
     List<Usuario> obtenerRankingUsuarios();
-    void eliminarUsuario(Long id);
     Usuario actualizarUsuario(Long id, Usuario usuarioActualizado);
     Usuario cambiarContrasena(Long id, String nuevaContrasena);
-    Usuario habilitarUsuario(Long id);
-    Usuario deshabilitarUsuario(Long id);
     Usuario actualizarPerfil(Long id, String perfilUrl);
-    UsuarioDTO convertirADTO(Usuario usuario);
+    Usuario actualizarEstado(Long id, boolean activo);
+    void eliminarUsuario(Long id);
     Usuario asignarRol(Long idUsuario, String nuevoRol);
+    UsuarioDTO convertirADTO(Usuario usuario);
+    Map<String, Object> obtenerEstadisticasUsuarios();
 }

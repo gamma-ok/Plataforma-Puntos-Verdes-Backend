@@ -12,9 +12,7 @@ import pe.com.puntosverdes.model.UsuarioRol;
 import pe.com.puntosverdes.repository.RolRepository;
 import pe.com.puntosverdes.repository.UsuarioRepository;
 import pe.com.puntosverdes.service.UsuarioService;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,16 +82,20 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 
 	@Override
-	public List<Usuario> obtenerRankingUsuarios() {
-		return usuarioRepository.findAllByOrderByPuntosAcumuladosDesc();
+	public List<Usuario> listarUsuariosPorEstado(boolean estado) {
+	    return usuarioRepository.findAll().stream()
+	            .filter(u -> u.isEnabled() == estado)
+	            .collect(Collectors.toList());
 	}
 
 	@Override
-	public void eliminarUsuario(Long id) {
-		if (!usuarioRepository.existsById(id)) {
-			throw new UsuarioNotFoundException("Usuario no encontrado con id: " + id);
-		}
-		usuarioRepository.deleteById(id);
+	public List<Usuario> listarUsuariosPorRol(String rolNombre) {
+		return usuarioRepository.findByUsuarioRoles_Rol_RolNombre(rolNombre);
+	}
+
+	@Override
+	public List<Usuario> obtenerRankingUsuarios() {
+		return usuarioRepository.findAllByOrderByPuntosAcumuladosDesc();
 	}
 
 	@Override
@@ -107,6 +109,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 				usuario.setEmail(usuarioActualizado.getEmail());
 			if (usuarioActualizado.getCelular() != null)
 				usuario.setCelular(usuarioActualizado.getCelular());
+			if (usuarioActualizado.getPerfil() != null)
+				usuario.setPerfil(usuarioActualizado.getPerfil());
 			return usuarioRepository.save(usuario);
 		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
 	}
@@ -120,27 +124,6 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 
 	@Override
-	public Usuario habilitarUsuario(Long id) {
-		return usuarioRepository.findById(id).map(usuario -> {
-			usuario.setEnabled(true);
-			return usuarioRepository.save(usuario);
-		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
-	}
-
-	@Override
-	public Usuario deshabilitarUsuario(Long id) {
-		return usuarioRepository.findById(id).map(usuario -> {
-			usuario.setEnabled(false);
-			return usuarioRepository.save(usuario);
-		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
-	}
-
-	@Override
-	public List<Usuario> listarUsuariosPorRol(String rolNombre) {
-		return usuarioRepository.findByUsuarioRoles_Rol_RolNombre(rolNombre);
-	}
-
-	@Override
 	public Usuario actualizarPerfil(Long id, String perfilUrl) {
 		return usuarioRepository.findById(id).map(usuario -> {
 			usuario.setPerfil(perfilUrl);
@@ -149,12 +132,19 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 
 	@Override
-	public UsuarioDTO convertirADTO(Usuario usuario) {
-		Set<String> roles = usuario.getUsuarioRoles().stream().map(ur -> ur.getRol().getRolNombre())
-				.collect(Collectors.toSet());
+	public Usuario actualizarEstado(Long id, boolean activo) {
+		return usuarioRepository.findById(id).map(usuario -> {
+			usuario.setEnabled(activo);
+			return usuarioRepository.save(usuario);
+		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + id));
+	}
 
-		return new UsuarioDTO(usuario.getId(), usuario.getUsername(), usuario.getNombre(), usuario.getApellido(),
-				usuario.getEmail(), usuario.getCelular(), usuario.isEnabled(), roles);
+	@Override
+	public void eliminarUsuario(Long id) {
+		if (!usuarioRepository.existsById(id)) {
+			throw new UsuarioNotFoundException("Usuario no encontrado con id: " + id);
+		}
+		usuarioRepository.deleteById(id);
 	}
 
 	@Override
@@ -168,11 +158,38 @@ public class UsuarioServiceImpl implements UsuarioService {
 			}
 
 			usuario.getUsuarioRoles().clear();
-
-			UsuarioRol usuarioRol = new UsuarioRol(usuario, rol);
-			usuario.getUsuarioRoles().add(usuarioRol);
+			usuario.getUsuarioRoles().add(new UsuarioRol(usuario, rol));
 
 			return usuarioRepository.save(usuario);
 		}).orElseThrow(() -> new UsuarioNotFoundException("Usuario no encontrado con id: " + idUsuario));
+	}
+
+	@Override
+	public UsuarioDTO convertirADTO(Usuario usuario) {
+		Set<String> roles = usuario.getUsuarioRoles().stream().map(ur -> ur.getRol().getRolNombre())
+				.collect(Collectors.toSet());
+
+		return new UsuarioDTO(usuario.getId(), usuario.getUsername(), usuario.getNombre(), usuario.getApellido(),
+				usuario.getEmail(), usuario.getCelular(), usuario.isEnabled(), roles);
+	}
+
+	@Override
+	public Map<String, Object> obtenerEstadisticasUsuarios() {
+		Map<String, Object> stats = new HashMap<>();
+
+		List<Usuario> todos = usuarioRepository.findAll();
+		long total = todos.size();
+		long activos = todos.stream().filter(Usuario::isEnabled).count();
+		long inactivos = total - activos;
+
+		Map<String, Long> porRol = todos.stream().flatMap(u -> u.getUsuarioRoles().stream())
+				.collect(Collectors.groupingBy(ur -> ur.getRol().getRolNombre(), Collectors.counting()));
+
+		stats.put("totalUsuarios", total);
+		stats.put("activos", activos);
+		stats.put("inactivos", inactivos);
+		stats.put("porRol", porRol);
+
+		return stats;
 	}
 }
