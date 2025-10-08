@@ -226,7 +226,7 @@ public class UsuarioController {
     }
     
     // Actualizar datos de cualquier usuario (solo ADMIN)
-    @PutMapping("/{id}/actualizar-admin")
+    @PutMapping("/{id}/actualizar/admin")
     public ResponseEntity<UsuarioDTO> actualizarUsuarioPorAdmin(
             @PathVariable Long id,
             @RequestBody Usuario usuarioActualizado
