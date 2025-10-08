@@ -12,6 +12,7 @@ import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.CampaniaService;
 import pe.com.puntosverdes.service.UsuarioService;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -19,62 +20,72 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 public class CampaniaController {
 
-	@Autowired
-	private CampaniaService campaniaService;
+    @Autowired
+    private CampaniaService campaniaService;
 
-	@Autowired
-	private UsuarioService usuarioService;
+    @Autowired
+    private UsuarioService usuarioService;
 
-	@PostMapping("/")
-	public ResponseEntity<Campania> crearCampania(@RequestBody Campania campania, Authentication authentication) {
+    // Registrar nueva campaña
+    @PostMapping("/registrar")
+    public ResponseEntity<CampaniaDTO> registrar(@RequestBody Campania campania, Authentication authentication) {
+        Usuario creador = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
+        campania.setCreadoPor(creador);
 
-		Usuario creador = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
-		campania.setCreadoPor(creador);
+        Campania creada = campaniaService.crearCampania(campania);
+        return ResponseEntity.ok(CampaniaMapper.toDTO(creada));
+    }
 
-		Campania creada = campaniaService.crearCampania(campania);
-		return ResponseEntity.ok(creada);
-	}
+    // Listar todas las campañas
+    @GetMapping("/listar")
+    public ResponseEntity<List<CampaniaDTO>> listar() {
+        return ResponseEntity.ok(
+                campaniaService.listarCampanias().stream().map(CampaniaMapper::toDTO).collect(Collectors.toList())
+        );
+    }
 
-	@GetMapping("/")
-	public ResponseEntity<List<CampaniaDTO>> listar() {
-		List<CampaniaDTO> lista = campaniaService.listarCampanias().stream().map(CampaniaMapper::toDTO)
-				.collect(Collectors.toList());
-		return ResponseEntity.ok(lista);
-	}
+    // Listar por estado (activas/inactivas)
+    @GetMapping("/estado/{activa}")
+    public ResponseEntity<List<CampaniaDTO>> listarPorEstado(@PathVariable boolean activa) {
+        return ResponseEntity.ok(
+                campaniaService.listarPorEstado(activa).stream().map(CampaniaMapper::toDTO).collect(Collectors.toList())
+        );
+    }
 
-	@GetMapping("/activas")
-	public ResponseEntity<List<CampaniaDTO>> listarActivas() {
-		List<CampaniaDTO> activas = campaniaService.listarCampaniasActivas().stream().map(CampaniaMapper::toDTO)
-				.collect(Collectors.toList());
-		return ResponseEntity.ok(activas);
-	}
+    // Obtener detalles
+    @GetMapping("/{id}/detalle")
+    public ResponseEntity<CampaniaDetalleDTO> detalle(@PathVariable Long id) {
+        Campania campania = campaniaService.obtenerPorId(id);
+        if (campania == null)
+            return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(CampaniaMapper.toDetalleDTO(campania));
+    }
 
-	@GetMapping("/{id}")
-	public ResponseEntity<CampaniaDetalleDTO> obtenerPorId(@PathVariable Long id) {
-		Campania campania = campaniaService.obtenerPorId(id);
-		if (campania == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(CampaniaMapper.toDetalleDTO(campania));
-	}
+    // Actualizar campaña
+    @PutMapping("/{id}/actualizar")
+    public ResponseEntity<CampaniaDTO> actualizar(@PathVariable Long id, @RequestBody Campania datos) {
+        return ResponseEntity.ok(CampaniaMapper.toDTO(campaniaService.actualizarCampania(id, datos)));
+    }
 
-	@PutMapping("/{id}/desactivar")
-	public ResponseEntity<Void> desactivar(@PathVariable Long id) {
-		campaniaService.desactivarCampania(id);
-		return ResponseEntity.noContent().build();
-	}
+    // Buscar por titulo
+    @GetMapping("/buscar/titulo/{titulo}")
+    public ResponseEntity<List<CampaniaDTO>> buscarPorTitulo(@PathVariable String titulo) {
+        return ResponseEntity.ok(
+                campaniaService.buscarCampaniaPorTitulo(titulo).stream().map(CampaniaMapper::toDTO).collect(Collectors.toList())
+        );
+    }
 
-	@GetMapping("/buscar/titulo/{titulo}")
-	public ResponseEntity<List<CampaniaDTO>> buscarPorTitulo(@PathVariable String titulo) {
-		List<CampaniaDTO> resultados = campaniaService.buscarCampaniaPorTitulo(titulo).stream()
-				.map(CampaniaMapper::toDTO).collect(Collectors.toList());
-		return ResponseEntity.ok(resultados);
-	}
+    // Buscar por ubicación
+    @GetMapping("/buscar/ubicacion/{ubicacion}")
+    public ResponseEntity<List<CampaniaDTO>> buscarPorUbicacion(@PathVariable String ubicacion) {
+        return ResponseEntity.ok(
+                campaniaService.buscarCampaniaPorUbicacion(ubicacion).stream().map(CampaniaMapper::toDTO).collect(Collectors.toList())
+        );
+    }
 
-	@GetMapping("/buscar/ubicacion/{ubicacion}")
-	public ResponseEntity<List<CampaniaDTO>> buscarPorUbicacion(@PathVariable String ubicacion) {
-		List<CampaniaDTO> resultados = campaniaService.buscarCampaniaPorUbicacion(ubicacion).stream()
-				.map(CampaniaMapper::toDTO).collect(Collectors.toList());
-		return ResponseEntity.ok(resultados);
-	}
+    // Estadisticas generales
+    @GetMapping("/estadisticas")
+    public ResponseEntity<Map<String, Object>> estadisticas() {
+        return ResponseEntity.ok(campaniaService.obtenerEstadisticas());
+    }
 }

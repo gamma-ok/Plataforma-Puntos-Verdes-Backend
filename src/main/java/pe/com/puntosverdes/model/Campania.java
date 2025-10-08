@@ -25,7 +25,6 @@ public class Campania {
 	private String ubicacion;
 
 	private boolean activa = true;
-
 	private int puntosExtra = 0;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -37,11 +36,18 @@ public class Campania {
 	@JsonIgnore
 	private Set<Entrega> entregas = new HashSet<>();
 
+	@PrePersist
+	public void validarFechas() {
+		if (fechaFin != null && fechaInicio != null && fechaFin.isBefore(fechaInicio)) {
+			throw new RuntimeException("La fecha de fin no puede ser anterior a la fecha de inicio.");
+		}
+	}
+
 	public Campania() {
 	}
 
-	public Campania(String titulo, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin,
-			String ubicacion, int puntosExtra, Usuario creadoPor) {
+	public Campania(String titulo, String descripcion, String descripcionCorta, LocalDateTime fechaInicio,
+			LocalDateTime fechaFin, String ubicacion, int puntosExtra, Usuario creadoPor) {
 		this.titulo = titulo;
 		this.descripcion = descripcion;
 		this.fechaInicio = fechaInicio;
