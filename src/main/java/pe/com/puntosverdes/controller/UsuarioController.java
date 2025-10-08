@@ -1,14 +1,18 @@
 package pe.com.puntosverdes.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import pe.com.puntosverdes.dto.AjustePuntosRequest;
 import pe.com.puntosverdes.dto.UsuarioDTO;
 import pe.com.puntosverdes.dto.UsuarioPerfilDTO;
 import pe.com.puntosverdes.model.Usuario;
 import pe.com.puntosverdes.service.UsuarioService;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,42 +26,15 @@ public class UsuarioController {
 	@Autowired
 	private UsuarioService usuarioService;
 
+	@Value("${upload.perfiles.dir}")
+	private String uploadPerfilesDir;
+
 	// Registrar usuario (público)
 	@PostMapping("/registrar")
 	public ResponseEntity<UsuarioDTO> registrarUsuario(@RequestBody Usuario usuario) {
 		usuario.setPerfil("default.png");
 		Usuario creado = usuarioService.crearUsuario(usuario);
 		return ResponseEntity.ok(usuarioService.convertirADTO(creado));
-	}
-	
-	// Buscar usuario por ID
-	@GetMapping("/buscar/{id}")
-	public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
-	    Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
-	    return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
-	}
-
-	// Buscar usuario por username
-	@GetMapping("/buscar/username/{username}")
-	public ResponseEntity<UsuarioDTO> buscarPorUsername(@PathVariable String username) {
-	    Usuario usuario = usuarioService.obtenerUsuarioPorUsername(username);
-	    return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
-	}
-
-	// Buscar usuario por email
-	@GetMapping("/buscar/email/{email}")
-	public ResponseEntity<UsuarioDTO> buscarPorEmail(@PathVariable String email) {
-	    Usuario usuario = usuarioService.obtenerUsuarioPorEmail(email);
-	    return ResponseEntity.ok(usuarioService.convertirADTO(usuario));
-	}
-
-	// Buscar usuario por celular
-	@GetMapping("/buscar/celular/{celular}")
-	public ResponseEntity<List<UsuarioDTO>> buscarPorCelular(@PathVariable String celular) {
-	    List<UsuarioDTO> usuarios = usuarioService.obtenerUsuariosPorCelular(celular)
-	            .stream().map(usuarioService::convertirADTO)
-	            .collect(Collectors.toList());
-	    return ResponseEntity.ok(usuarios);
 	}
 
 	// Listar todos los usuarios
@@ -92,6 +69,7 @@ public class UsuarioController {
 		UsuarioPerfilDTO dto = new UsuarioPerfilDTO(usuario.getUsername(), usuario.getNombre(), usuario.getApellido(),
 				usuario.getEmail(), usuario.getCelular(), usuario.getPerfil(), roles, usuario.getPuntosAcumulados(),
 				usuario.getFechaRegistro());
+
 		return ResponseEntity.ok(dto);
 	}
 
@@ -102,7 +80,37 @@ public class UsuarioController {
 		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
 	}
 
-	// Cambiar contraseña (solo ADMIN o MUNICIPALIDAD)
+	// Subir o actualizar foto de perfil (usuario o admin)
+	@PostMapping("/{id}/perfil")
+	public ResponseEntity<UsuarioDTO> subirFotoPerfil(@PathVariable Long id,
+			@RequestParam("imagen") MultipartFile imagen) throws IOException {
+
+		if (imagen.isEmpty()) {
+			throw new IllegalArgumentException("No se recibió ninguna imagen.");
+		}
+
+		File directorio = new File(uploadPerfilesDir);
+		if (!directorio.exists())
+			directorio.mkdirs();
+
+		Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
+
+		// Eliminar foto anterior si no es la predeterminada
+		if (usuario.getPerfil() != null && !usuario.getPerfil().equals("default.png")) {
+			File archivoAntiguo = new File(uploadPerfilesDir + usuario.getPerfil());
+			if (archivoAntiguo.exists())
+				archivoAntiguo.delete();
+		}
+
+		String nombreArchivo = System.currentTimeMillis() + "_" + imagen.getOriginalFilename();
+		File archivoDestino = new File(uploadPerfilesDir + nombreArchivo);
+		imagen.transferTo(archivoDestino);
+
+		Usuario actualizado = usuarioService.actualizarPerfil(id, nombreArchivo);
+		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
+	}
+
+	// Cambiar contraseña (solo ADMIN)
 	@PutMapping("/{id}/cambiar-contrasena")
 	public ResponseEntity<UsuarioDTO> cambiarContrasena(@PathVariable Long id,
 			@RequestBody Map<String, String> request) {
@@ -110,7 +118,7 @@ public class UsuarioController {
 		return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
 	}
 
-	// Cambiar estado activo/inactivo
+	// Cambiar estado activo/inactivo (solo ADMIN)
 	@PutMapping("/{id}/estado/{activo}")
 	public ResponseEntity<UsuarioDTO> cambiarEstado(@PathVariable Long id, @PathVariable boolean activo) {
 		Usuario actualizado = usuarioService.actualizarEstado(id, activo);
@@ -150,14 +158,5 @@ public class UsuarioController {
 	@GetMapping("/ranking")
 	public ResponseEntity<List<Usuario>> ranking() {
 		return ResponseEntity.ok(usuarioService.obtenerRankingUsuarios());
-	}
-	
-	// Actualizar datos de un usuario (solo ADMIN/MUNICIPALIDAD)
-	@PutMapping("/{id}/actualizar-admin")
-	public ResponseEntity<UsuarioDTO> actualizarPorAdmin(
-	        @PathVariable Long id,
-	        @RequestBody Usuario usuarioActualizado) {
-	    Usuario actualizado = usuarioService.actualizarUsuario(id, usuarioActualizado);
-	    return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
 	}
 }
