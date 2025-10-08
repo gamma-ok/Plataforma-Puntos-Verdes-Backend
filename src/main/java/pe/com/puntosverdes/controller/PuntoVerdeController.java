@@ -106,4 +106,10 @@ public class PuntoVerdeController {
 
 		return ResponseEntity.ok(estadisticas);
 	}
+
+	@DeleteMapping("/eliminar/{id}")
+	public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+		puntoVerdeService.eliminarPuntoVerde(id);
+		return ResponseEntity.noContent().build();
+	}
 }

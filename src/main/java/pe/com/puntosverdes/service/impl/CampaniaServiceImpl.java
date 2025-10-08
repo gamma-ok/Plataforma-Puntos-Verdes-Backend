@@ -106,4 +106,11 @@ public class CampaniaServiceImpl implements CampaniaService {
             System.out.println("Campañas vencidas desactivadas automaticamente (" + LocalDateTime.now() + ")");
         }
     }
+    
+    @Override
+    public void eliminarCampania(Long id) {
+        Campania existente = campaniaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Campaña no encontrada con ID: " + id));
+        campaniaRepository.delete(existente);
+    }
 }

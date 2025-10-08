@@ -13,4 +13,5 @@ public interface CampaniaService {
     List<Campania> buscarCampaniaPorUbicacion(String ubicacion);
     Campania actualizarCampania(Long id, Campania datos);
     Map<String, Object> obtenerEstadisticas();
+    void eliminarCampania(Long id);
 }

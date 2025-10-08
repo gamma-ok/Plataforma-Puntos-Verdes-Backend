@@ -10,4 +10,5 @@ public interface PuntoVerdeService {
     List<PuntoVerde> listarPorEstado(boolean activo);
     List<PuntoVerde> buscarPorNombre(String nombre);
     PuntoVerde actualizarPuntoVerde(Long id, PuntoVerde datos);
+    void eliminarPuntoVerde(Long id);
 }

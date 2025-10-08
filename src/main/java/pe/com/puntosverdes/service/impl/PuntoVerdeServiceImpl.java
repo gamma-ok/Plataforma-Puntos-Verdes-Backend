@@ -54,8 +54,15 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 			existente.setLatitud(datos.getLatitud());
 		if (datos.getLongitud() != null)
 			existente.setLongitud(datos.getLongitud());
-		existente.setActivo(datos.isActivo()); // ✅ también se actualiza el estado
+		existente.setActivo(datos.isActivo());
 
 		return puntoVerdeRepository.save(existente);
+	}
+	
+	@Override
+	public void eliminarPuntoVerde(Long id) {
+	    PuntoVerde existente = puntoVerdeRepository.findById(id)
+	            .orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con ID: " + id));
+	    puntoVerdeRepository.delete(existente);
 	}
 }

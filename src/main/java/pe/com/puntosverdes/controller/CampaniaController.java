@@ -88,4 +88,10 @@ public class CampaniaController {
     public ResponseEntity<Map<String, Object>> estadisticas() {
         return ResponseEntity.ok(campaniaService.obtenerEstadisticas());
     }
+    
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        campaniaService.eliminarCampania(id);
+        return ResponseEntity.noContent().build();
+    }
 }
