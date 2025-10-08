@@ -7,6 +7,6 @@ import java.util.List;
 
 @Repository
 public interface RecompensaRepository extends JpaRepository<Recompensa, Long> {
-    List<Recompensa> findByActivoTrue();
-    long countByActivoTrue();
+    List<Recompensa> findByActivo(boolean activo);
+    List<Recompensa> findByNombreContainingIgnoreCase(String nombre);
 }

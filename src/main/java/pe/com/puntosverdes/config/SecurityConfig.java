@@ -93,6 +93,12 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/incidencias/**")
 				.hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR")
 
+				// RECOMPENSAS
+				.requestMatchers(HttpMethod.GET, "/api/recompensas/**").authenticated()
+				.requestMatchers(HttpMethod.POST, "/api/recompensas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/recompensas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.DELETE, "/api/recompensas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				
 				// PUNTOS VERDES
 				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")

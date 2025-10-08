@@ -23,16 +23,5 @@ public class DashboardController {
 	@Autowired
 	private RecompensaRepository recompensaRepository;
 
-	@GetMapping("/resumen")
-	public ResponseEntity<DashboardResumenDTO> obtenerResumen() {
-		long totalEntregasValidadas = entregaRepository.countByValidadaTrue();
-		long totalCanjesAprobados = canjeRepository.countByEstado("APROBADO");
-		long totalCampaniasActivas = campaniaRepository.countByActivaTrue();
-		long totalRecompensasActivas = recompensaRepository.countByActivoTrue();
-
-		DashboardResumenDTO resumen = new DashboardResumenDTO(totalEntregasValidadas, totalCanjesAprobados,
-				totalCampaniasActivas, totalRecompensasActivas);
-
-		return ResponseEntity.ok(resumen);
-	}
+	// EN PROCESO...
 }

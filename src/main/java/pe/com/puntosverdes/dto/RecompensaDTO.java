@@ -1,46 +1,27 @@
-package pe.com.puntosverdes.model;
+package pe.com.puntosverdes.dto;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "recompensas")
-public class Recompensa {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+public class RecompensaDTO {
 	private Long id;
-
 	private String nombre;
-
-	@Column(length = 2000)
 	private String descripcion;
-
-	@Min(1)
-	@Column(nullable = false)
 	private int puntosNecesarios;
+	private int stock;
+	private boolean activo;
+	private String creadoPorNombre;
+	private LocalDateTime fechaCreacion;
 
-	private int stock = 0;
-	private boolean activo = true;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "creado_por_id")
-	private Usuario creadoPor;
-
-	private LocalDateTime fechaCreacion = LocalDateTime.now();
-
-	public Recompensa() {
-	}
-
-	public Recompensa(String nombre, String descripcion, int puntosNecesarios, int stock, Usuario creadoPor) {
+	public RecompensaDTO(Long id, String nombre, String descripcion, int puntosNecesarios, int stock, boolean activo,
+			String creadoPorNombre, LocalDateTime fechaCreacion) {
+		this.id = id;
 		this.nombre = nombre;
 		this.descripcion = descripcion;
 		this.puntosNecesarios = puntosNecesarios;
 		this.stock = stock;
-		this.activo = true;
-		this.creadoPor = creadoPor;
-		this.fechaCreacion = LocalDateTime.now();
+		this.activo = activo;
+		this.creadoPorNombre = creadoPorNombre;
+		this.fechaCreacion = fechaCreacion;
 	}
 
 	public Long getId() {
@@ -91,12 +72,12 @@ public class Recompensa {
 		this.activo = activo;
 	}
 
-	public Usuario getCreadoPor() {
-		return creadoPor;
+	public String getCreadoPorNombre() {
+		return creadoPorNombre;
 	}
 
-	public void setCreadoPor(Usuario creadoPor) {
-		this.creadoPor = creadoPor;
+	public void setCreadoPorNombre(String creadoPorNombre) {
+		this.creadoPorNombre = creadoPorNombre;
 	}
 
 	public LocalDateTime getFechaCreacion() {
