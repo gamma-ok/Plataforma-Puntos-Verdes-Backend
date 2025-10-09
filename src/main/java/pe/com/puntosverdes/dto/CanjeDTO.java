@@ -4,29 +4,18 @@ import java.time.LocalDateTime;
 
 public class CanjeDTO {
 	private Long id;
-	private String estado;
 	private String recompensaNombre;
 	private String usuarioNombre;
 	private int puntosUsados;
-	private LocalDateTime fechaSolicitud;
-	private LocalDateTime fechaResolucion;
-	private String respuestaAdmin;
-	private String motivoRechazo;
+	private LocalDateTime fechaCanje;
 
-	public CanjeDTO() {
-	}
-
-	public CanjeDTO(Long id, String estado, String recompensaNombre, String usuarioNombre, int puntosUsados,
-			LocalDateTime fechaSolicitud, LocalDateTime fechaResolucion, String respuestaAdmin, String motivoRechazo) {
+	public CanjeDTO(Long id, String recompensaNombre, String usuarioNombre, int puntosUsados,
+			LocalDateTime fechaCanje) {
 		this.id = id;
-		this.estado = estado;
 		this.recompensaNombre = recompensaNombre;
 		this.usuarioNombre = usuarioNombre;
 		this.puntosUsados = puntosUsados;
-		this.fechaSolicitud = fechaSolicitud;
-		this.fechaResolucion = fechaResolucion;
-		this.respuestaAdmin = respuestaAdmin;
-		this.motivoRechazo = motivoRechazo;
+		this.fechaCanje = fechaCanje;
 	}
 
 	public Long getId() {
@@ -35,14 +24,6 @@ public class CanjeDTO {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getEstado() {
-		return estado;
-	}
-
-	public void setEstado(String estado) {
-		this.estado = estado;
 	}
 
 	public String getRecompensaNombre() {
@@ -69,35 +50,11 @@ public class CanjeDTO {
 		this.puntosUsados = puntosUsados;
 	}
 
-	public LocalDateTime getFechaSolicitud() {
-		return fechaSolicitud;
+	public LocalDateTime getFechaCanje() {
+		return fechaCanje;
 	}
 
-	public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
-		this.fechaSolicitud = fechaSolicitud;
-	}
-
-	public LocalDateTime getFechaResolucion() {
-		return fechaResolucion;
-	}
-
-	public void setFechaResolucion(LocalDateTime fechaResolucion) {
-		this.fechaResolucion = fechaResolucion;
-	}
-
-	public String getRespuestaAdmin() {
-		return respuestaAdmin;
-	}
-
-	public void setRespuestaAdmin(String respuestaAdmin) {
-		this.respuestaAdmin = respuestaAdmin;
-	}
-
-	public String getMotivoRechazo() {
-		return motivoRechazo;
-	}
-
-	public void setMotivoRechazo(String motivoRechazo) {
-		this.motivoRechazo = motivoRechazo;
+	public void setFechaCanje(LocalDateTime fechaCanje) {
+		this.fechaCanje = fechaCanje;
 	}
 }

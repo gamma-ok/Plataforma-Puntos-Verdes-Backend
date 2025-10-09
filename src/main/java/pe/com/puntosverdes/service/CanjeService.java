@@ -6,11 +6,9 @@ import pe.com.puntosverdes.model.Usuario;
 import java.util.List;
 
 public interface CanjeService {
-    Canje crearCanje(Usuario usuario, Recompensa recompensa);
-    Canje aprobarCanje(Long canjeId, String respuestaAdmin);
-    Canje rechazarCanje(Long canjeId, String motivo, String respuestaAdmin);
+    Canje realizarCanje(Usuario usuario, Recompensa recompensa);
     Canje obtenerPorId(Long id);
     List<Canje> listarCanjes();
     List<Canje> listarPorUsuario(Long usuarioId);
-    List<Canje> buscarCanjes(String estado, String fechaInicio, String fechaFin, Long usuarioId);
+    void eliminarCanje(Long id);
 }

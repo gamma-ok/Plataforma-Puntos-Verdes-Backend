@@ -21,21 +21,9 @@ public class Canje {
 	@JoinColumn(name = "recompensa_id", nullable = false)
 	private Recompensa recompensa;
 
-	private LocalDateTime fechaSolicitud = LocalDateTime.now();
-
-	private LocalDateTime fechaResolucion;
+	private LocalDateTime fechaCanje = LocalDateTime.now();
 
 	private int puntosUsados;
-
-	private String estado = "PENDIENTE";
-
-	@Column(length = 1000)
-	private String respuestaAdmin;
-
-	@Column(length = 1000)
-	private String motivoRechazo;
-
-	private String resueltoPor;
 
 	public Canje() {
 	}
@@ -44,8 +32,7 @@ public class Canje {
 		this.usuario = usuario;
 		this.recompensa = recompensa;
 		this.puntosUsados = puntosUsados;
-		this.fechaSolicitud = LocalDateTime.now();
-		this.estado = "PENDIENTE";
+		this.fechaCanje = LocalDateTime.now();
 	}
 
 	public Long getId() {
@@ -72,20 +59,12 @@ public class Canje {
 		this.recompensa = recompensa;
 	}
 
-	public LocalDateTime getFechaSolicitud() {
-		return fechaSolicitud;
+	public LocalDateTime getFechaCanje() {
+		return fechaCanje;
 	}
 
-	public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
-		this.fechaSolicitud = fechaSolicitud;
-	}
-
-	public LocalDateTime getFechaResolucion() {
-		return fechaResolucion;
-	}
-
-	public void setFechaResolucion(LocalDateTime fechaResolucion) {
-		this.fechaResolucion = fechaResolucion;
+	public void setFechaCanje(LocalDateTime fechaCanje) {
+		this.fechaCanje = fechaCanje;
 	}
 
 	public int getPuntosUsados() {
@@ -94,37 +73,5 @@ public class Canje {
 
 	public void setPuntosUsados(int puntosUsados) {
 		this.puntosUsados = puntosUsados;
-	}
-
-	public String getEstado() {
-		return estado;
-	}
-
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
-
-	public String getRespuestaAdmin() {
-		return respuestaAdmin;
-	}
-
-	public void setRespuestaAdmin(String respuestaAdmin) {
-		this.respuestaAdmin = respuestaAdmin;
-	}
-
-	public String getMotivoRechazo() {
-		return motivoRechazo;
-	}
-
-	public void setMotivoRechazo(String motivoRechazo) {
-		this.motivoRechazo = motivoRechazo;
-	}
-
-	public String getResueltoPor() {
-		return resueltoPor;
-	}
-
-	public void setResueltoPor(String resueltoPor) {
-		this.resueltoPor = resueltoPor;
 	}
 }
