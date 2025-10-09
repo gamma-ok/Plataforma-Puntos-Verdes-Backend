@@ -47,7 +47,7 @@ public class UsuarioController {
     }
 
     // Listar por estado (activo/inactivo)
-    @GetMapping("/listar/{estado}")
+    @GetMapping("/listar/estado/{estado}")
     public ResponseEntity<List<UsuarioDTO>> listarPorEstado(@PathVariable boolean estado) {
         List<UsuarioDTO> usuarios = usuarioService.listarUsuariosPorEstado(estado)
                 .stream()
@@ -120,7 +120,7 @@ public class UsuarioController {
     }
 
     // Actualizar datos personales (usuario autenticado)
-    @PutMapping("/{id}/actualizar")
+    @PutMapping("/actualizar/{id}")
     public ResponseEntity<UsuarioDTO> actualizarDatos(
             @PathVariable Long id,
             @RequestBody Usuario usuarioActualizado
@@ -160,7 +160,7 @@ public class UsuarioController {
     }
 
     // Cambiar contraseña (solo ADMIN)
-    @PutMapping("/{id}/cambiar-contrasena")
+    @PutMapping("/{id}/cambiar-contrasena/admin")
     public ResponseEntity<UsuarioDTO> cambiarContrasena(
             @PathVariable Long id,
             @RequestBody Map<String, String> request
@@ -170,7 +170,7 @@ public class UsuarioController {
     }
 
     // Cambiar estado activo/inactivo (solo ADMIN)
-    @PutMapping("/{id}/estado/{activo}")
+    @PutMapping("/{id}/estado/{activo}/admin")
     public ResponseEntity<UsuarioDTO> cambiarEstado(
             @PathVariable Long id,
             @PathVariable boolean activo
@@ -180,7 +180,7 @@ public class UsuarioController {
     }
 
     // Asignar rol (solo ADMIN)
-    @PutMapping("/{id}/asignar-rol")
+    @PutMapping("/{id}/asignar-rol/admin")
     public ResponseEntity<UsuarioDTO> asignarRol(
             @PathVariable Long id,
             @RequestBody Map<String, String> request
@@ -189,8 +189,8 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
     }
 
-    // Ajustar puntos (solo ADMIN/MUNICIPALIDAD)
-    @PutMapping("/{id}/ajustar-puntos")
+    // Ajustar puntos (solo ADMIN)
+    @PutMapping("/{id}/ajustar-puntos/admin")
     public ResponseEntity<UsuarioDTO> ajustarPuntos(
             @PathVariable Long id,
             @RequestBody AjustePuntosRequest request,

@@ -68,6 +68,17 @@ public class RecompensaServiceImpl implements RecompensaService {
 	}
 
 	@Override
+	public List<Recompensa> listarPorCreadorNombre(String nombreCompleto) {
+		return recompensaRepository.findByCreadoPorNombreContainingIgnoreCaseOrCreadoPorApellidoContainingIgnoreCase(
+				nombreCompleto, nombreCompleto);
+	}
+
+	@Override
+	public List<Recompensa> listarPorRolCreador(String rolNombre) {
+		return recompensaRepository.findByCreadoPorUsuarioRolesRolRolNombreIgnoreCase(rolNombre);
+	}
+
+	@Override
 	public RecompensaDTO convertirADTO(Recompensa recompensa) {
 		String creadoPorNombre = null;
 		Usuario creador = recompensa.getCreadoPor();
@@ -76,7 +87,7 @@ public class RecompensaServiceImpl implements RecompensaService {
 		}
 		return new RecompensaDTO(recompensa.getId(), recompensa.getNombre(), recompensa.getDescripcion(),
 				recompensa.getPuntosNecesarios(), recompensa.getStock(), recompensa.isActivo(), creadoPorNombre,
-				recompensa.getFechaCreacion());
+				recompensa.getFechaCreacion(), recompensa.getFechaActualizacion());
 	}
 
 	@Override
@@ -88,7 +99,6 @@ public class RecompensaServiceImpl implements RecompensaService {
 		long activas = todas.stream().filter(Recompensa::isActivo).count();
 		long inactivas = total - activas;
 
-		// En el futuro: reemplazar estos cálculos con los datos reales desde "canjes"
 		String masReclamada = todas.stream().findFirst().map(Recompensa::getNombre).orElse("N/A");
 		String menosReclamada = todas.stream().skip(todas.size() > 1 ? todas.size() - 1 : 0).findFirst()
 				.map(Recompensa::getNombre).orElse("N/A");

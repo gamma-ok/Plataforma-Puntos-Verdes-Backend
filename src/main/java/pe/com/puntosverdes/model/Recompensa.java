@@ -29,6 +29,7 @@ public class Recompensa {
 	private Usuario creadoPor;
 
 	private LocalDateTime fechaCreacion = LocalDateTime.now();
+	private LocalDateTime fechaActualizacion = LocalDateTime.now();
 
 	public Recompensa() {
 	}
@@ -41,6 +42,12 @@ public class Recompensa {
 		this.activo = true;
 		this.creadoPor = creadoPor;
 		this.fechaCreacion = LocalDateTime.now();
+		this.fechaActualizacion = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	public void preUpdate() {
+		this.fechaActualizacion = LocalDateTime.now();
 	}
 
 	public Long getId() {
@@ -105,5 +112,13 @@ public class Recompensa {
 
 	public void setFechaCreacion(LocalDateTime fechaCreacion) {
 		this.fechaCreacion = fechaCreacion;
+	}
+
+	public LocalDateTime getFechaActualizacion() {
+		return fechaActualizacion;
+	}
+
+	public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
 	}
 }

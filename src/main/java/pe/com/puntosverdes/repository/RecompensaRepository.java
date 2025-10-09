@@ -9,4 +9,6 @@ import java.util.List;
 public interface RecompensaRepository extends JpaRepository<Recompensa, Long> {
     List<Recompensa> findByActivo(boolean activo);
     List<Recompensa> findByNombreContainingIgnoreCase(String nombre);
+    List<Recompensa> findByCreadoPorNombreContainingIgnoreCaseOrCreadoPorApellidoContainingIgnoreCase(String nombre, String apellido);
+    List<Recompensa> findByCreadoPorUsuarioRolesRolRolNombreIgnoreCase(String rolNombre);
 }

@@ -13,6 +13,8 @@ public interface RecompensaService {
     Recompensa obtenerPorId(Long id);
     void eliminarRecompensa(Long id);
     List<Recompensa> buscarPorNombre(String nombre);
+    List<Recompensa> listarPorCreadorNombre(String nombreCompleto);
+    List<Recompensa> listarPorRolCreador(String rolNombre);
     RecompensaDTO convertirADTO(Recompensa recompensa);
     Map<String, Object> obtenerEstadisticas();
 }
