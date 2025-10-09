@@ -10,15 +10,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pe.com.puntosverdes.dto.IncidenciaRespuestaDTO;
+import pe.com.puntosverdes.dto.IncidenciaDTO;
 import pe.com.puntosverdes.dto.IncidenciaValidacionDTO;
 import pe.com.puntosverdes.model.Incidencia;
 import pe.com.puntosverdes.model.Usuario;
-import pe.com.puntosverdes.repository.IncidenciaRepository;
 import pe.com.puntosverdes.service.IncidenciaService;
 import pe.com.puntosverdes.service.UsuarioService;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -34,18 +34,15 @@ public class IncidenciaController {
 	@Autowired
 	private UsuarioService usuarioService;
 
-	@Autowired
-	private IncidenciaRepository incidenciaRepository;
-
+	// Carpeta donde se almacenan los archivos de incidencias
 	@Value("${upload.incidencias.dir}")
 	private String uploadDir;
 
-	// REGISTRAR INCIDENCIA
-	@PostMapping("/")
-	public ResponseEntity<Incidencia> registrar(@RequestBody Incidencia incidencia, Authentication auth) {
+	// REGISTRAR NUEVA INCIDENCIA
+	@PostMapping("/registrar")
+	public ResponseEntity<IncidenciaDTO> registrar(@RequestBody Incidencia incidencia, Authentication auth) {
 		Usuario usuario = usuarioService.obtenerUsuarioPorUsername(auth.getName());
 
-		// Solo recolectores pueden registrar incidencias
 		boolean esRecolector = usuario.getUsuarioRoles().stream()
 				.anyMatch(r -> r.getRol().getRolNombre().equalsIgnoreCase("RECOLECTOR"));
 
@@ -57,54 +54,65 @@ public class IncidenciaController {
 		return ResponseEntity.ok(incidenciaService.registrarIncidencia(incidencia));
 	}
 
-	// LISTAR INCIDENCIAS
-	@GetMapping("/")
-	public ResponseEntity<List<Incidencia>> listar() {
+	// LISTAR TODAS LAS INCIDENCIAS
+	@GetMapping("/listar")
+	public ResponseEntity<List<IncidenciaDTO>> listar() {
 		return ResponseEntity.ok(incidenciaService.listarIncidencias());
 	}
 
-	@GetMapping("/usuario/{usuarioId}")
-	public ResponseEntity<List<Incidencia>> listarPorUsuario(@PathVariable Long usuarioId) {
+	// LISTAR INCIDENCIAS POR ESTADO (APROBADO / PENDIENTE / RECHAZADO)
+	@GetMapping("/listar/estado/{estado}")
+	public ResponseEntity<List<IncidenciaDTO>> listarPorEstado(@PathVariable String estado) {
+		return ResponseEntity.ok(incidenciaService.listarPorEstado(estado.toUpperCase()));
+	}
+
+	// LISTAR INCIDENCIAS POR USUARIO
+	@GetMapping("/listar/usuario/{usuarioId}")
+	public ResponseEntity<List<IncidenciaDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
 		return ResponseEntity.ok(incidenciaService.listarPorUsuario(usuarioId));
 	}
 
-	// VALIDAR INCIDENCIA
-	@PutMapping("/{id}/validar")
-	public ResponseEntity<IncidenciaRespuestaDTO> validar(@PathVariable Long id,
-			@RequestBody IncidenciaValidacionDTO dto, Authentication auth) {
+	// OBTENER DETALLE DE INCIDENCIA POR ID
+	@GetMapping("/detalle/{id}")
+	public ResponseEntity<IncidenciaDTO> obtenerPorId(@PathVariable Long id) {
+		return ResponseEntity.ok(incidenciaService.obtenerPorId(id));
+	}
 
+	// OBTENER ÚLTIMA INCIDENCIA REPORTADA POR UN USUARIO
+	@GetMapping("/ultima/{usuarioId}")
+	public ResponseEntity<IncidenciaDTO> obtenerUltimaPorUsuario(@PathVariable Long usuarioId) {
+		return ResponseEntity.ok(incidenciaService.obtenerUltimaPorUsuario(usuarioId));
+	}
+
+	// VALIDAR O RESPONDER INCIDENCIA (ADMIN / MUNICIPALIDAD)
+	@PutMapping("/{id}/validar")
+	public ResponseEntity<IncidenciaDTO> validar(@PathVariable Long id, @RequestBody IncidenciaValidacionDTO dto,
+			Authentication auth) {
 		Usuario admin = usuarioService.obtenerUsuarioPorUsername(auth.getName());
 		return ResponseEntity.ok(incidenciaService.validarIncidencia(id, dto, admin.getId()));
 	}
 
-	// SUBIR EVIDENCIAS
-	@PostMapping("/{id}/evidencias")
-	public ResponseEntity<Map<String, Object>> subirEvidencias(@PathVariable Long id,
+	// SUBIR ARCHIVOS RELACIONADOS A UNA INCIDENCIA
+	@PostMapping("/{id}/incidencias")
+	public ResponseEntity<Map<String, Object>> subirArchivos(@PathVariable Long id,
 			@RequestParam("files") List<MultipartFile> files) {
-
 		try {
-			// Crear carpeta si no existe
 			File directory = new File(uploadDir);
 			if (!directory.exists()) {
 				directory.mkdirs();
 			}
 
-			// Guardar archivos
-			List<String> rutasEvidencias = new ArrayList<>();
+			List<String> nombresArchivos = new ArrayList<>();
 			for (MultipartFile file : files) {
 				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 				String filePath = uploadDir + fileName;
 
-				File dest = new File(filePath);
-				file.transferTo(dest);
-
-				rutasEvidencias.add(fileName);
+				file.transferTo(new File(filePath));
+				nombresArchivos.add(fileName);
 			}
 
-			// Actualizar en BD
-			Incidencia actualizada = incidenciaService.subirEvidencias(id, rutasEvidencias);
-
-			return ResponseEntity.ok(Map.of("incidenciaId", actualizada.getId(), "evidencias", rutasEvidencias));
+			IncidenciaDTO actualizada = incidenciaService.subirArchivos(id, nombresArchivos);
+			return ResponseEntity.ok(Map.of("incidenciaId", actualizada.getId(), "archivos", nombresArchivos));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -112,21 +120,27 @@ public class IncidenciaController {
 		}
 	}
 
-	// VISUALIZAR EVIDENCIAS
-	@GetMapping("/evidencias/{fileName:.+}")
-	public ResponseEntity<Resource> verEvidencia(@PathVariable String fileName) {
+	// VISUALIZAR ARCHIVO DE INCIDENCIA
+	@GetMapping("/archivos/{fileName:.+}")
+	public ResponseEntity<Resource> verArchivo(@PathVariable String fileName) {
 		try {
 			Path path = Paths.get(uploadDir).resolve(fileName);
 			Resource resource = new UrlResource(path.toUri());
 
-			if (resource.exists() || resource.isReadable()) {
-				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
+			if (resource.exists() && resource.isReadable()) {
+				String contentType = Files.probeContentType(path);
+				return ResponseEntity.ok()
+						.contentType(MediaType
+								.parseMediaType(contentType != null ? contentType : "application/octet-stream"))
+						.body(resource);
 			} else {
 				return ResponseEntity.notFound().build();
 			}
 
 		} catch (MalformedURLException e) {
 			return ResponseEntity.badRequest().build();
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 }

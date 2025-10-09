@@ -3,6 +3,8 @@ package pe.com.puntosverdes.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "incidencias")
@@ -19,11 +21,12 @@ public class Incidencia {
 
 	private LocalDateTime fechaReporte = LocalDateTime.now();
 
-	private boolean validada = false;
-	private LocalDateTime fechaValidacion;
+	private String estado = "PENDIENTE";
 
-	private String observaciones;
-	private int puntosGanados = 0;
+	private String observacionAdmin;
+	private String respuesta;
+
+	private LocalDateTime fechaRespuesta;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "reportado_por_id", nullable = false)
@@ -36,9 +39,9 @@ public class Incidencia {
 	private Usuario validadoPor;
 
 	@ElementCollection
-	@CollectionTable(name = "incidencia_evidencias", joinColumns = @JoinColumn(name = "incidencia_id"))
-	@Column(name = "url")
-	private java.util.List<String> evidencias = new java.util.ArrayList<>();
+	@CollectionTable(name = "incidencia_archivos", joinColumns = @JoinColumn(name = "incidencia_id"))
+	@Column(name = "archivo_nombre")
+	private List<String> incidenciasArchivos = new ArrayList<>();
 
 	public Incidencia() {
 	}
@@ -81,36 +84,36 @@ public class Incidencia {
 		this.fechaReporte = fechaReporte;
 	}
 
-	public boolean isValidada() {
-		return validada;
+	public String getEstado() {
+		return estado;
 	}
 
-	public void setValidada(boolean validada) {
-		this.validada = validada;
+	public void setEstado(String estado) {
+		this.estado = estado;
 	}
 
-	public LocalDateTime getFechaValidacion() {
-		return fechaValidacion;
+	public String getObservacionAdmin() {
+		return observacionAdmin;
 	}
 
-	public void setFechaValidacion(LocalDateTime fechaValidacion) {
-		this.fechaValidacion = fechaValidacion;
+	public void setObservacionAdmin(String observacionAdmin) {
+		this.observacionAdmin = observacionAdmin;
 	}
 
-	public String getObservaciones() {
-		return observaciones;
+	public String getRespuesta() {
+		return respuesta;
 	}
 
-	public void setObservaciones(String observaciones) {
-		this.observaciones = observaciones;
+	public void setRespuesta(String respuesta) {
+		this.respuesta = respuesta;
 	}
 
-	public int getPuntosGanados() {
-		return puntosGanados;
+	public LocalDateTime getFechaRespuesta() {
+		return fechaRespuesta;
 	}
 
-	public void setPuntosGanados(int puntosGanados) {
-		this.puntosGanados = puntosGanados;
+	public void setFechaRespuesta(LocalDateTime fechaRespuesta) {
+		this.fechaRespuesta = fechaRespuesta;
 	}
 
 	public Usuario getReportadoPor() {
@@ -129,11 +132,11 @@ public class Incidencia {
 		this.validadoPor = validadoPor;
 	}
 
-	public java.util.List<String> getEvidencias() {
-		return evidencias;
+	public List<String> getIncidenciasArchivos() {
+		return incidenciasArchivos;
 	}
 
-	public void setEvidencias(java.util.List<String> evidencias) {
-		this.evidencias = evidencias;
+	public void setIncidenciasArchivos(List<String> incidenciasArchivos) {
+		this.incidenciasArchivos = incidenciasArchivos;
 	}
 }
