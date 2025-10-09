@@ -103,12 +103,14 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.PUT, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.DELETE, "/api/puntos-verdes/**").hasAnyRole("ADMIN")
 
 				// CAMPAÑAS
 				.requestMatchers(HttpMethod.GET, "/api/campanias/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.PUT, "/api/campanias/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-
+				.requestMatchers(HttpMethod.DELETE, "/api/campanias/**").hasAnyRole("ADMIN")
+				
 				// DASHBOARD
 				.requestMatchers(HttpMethod.GET, "/api/dashboard/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 
