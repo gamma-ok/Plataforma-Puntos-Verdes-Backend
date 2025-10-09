@@ -1,17 +1,17 @@
 package pe.com.puntosverdes.dto;
 
 public class EntregaValidacionDTO {
-	private boolean validada;
+	private String estado;
 	private int puntosGanados;
-	private String respuestaAdmin;
 	private String observaciones;
+	private String respuestaAdmin;
 
-	public boolean isValidada() {
-		return validada;
+	public String getEstado() {
+		return estado;
 	}
 
-	public void setValidada(boolean validada) {
-		this.validada = validada;
+	public void setEstado(String estado) {
+		this.estado = estado;
 	}
 
 	public int getPuntosGanados() {
@@ -22,19 +22,19 @@ public class EntregaValidacionDTO {
 		this.puntosGanados = puntosGanados;
 	}
 
-	public String getRespuestaAdmin() {
-		return respuestaAdmin;
-	}
-
-	public void setRespuestaAdmin(String respuestaAdmin) {
-		this.respuestaAdmin = respuestaAdmin;
-	}
-
 	public String getObservaciones() {
 		return observaciones;
 	}
 
 	public void setObservaciones(String observaciones) {
 		this.observaciones = observaciones;
+	}
+
+	public String getRespuestaAdmin() {
+		return respuestaAdmin;
+	}
+
+	public void setRespuestaAdmin(String respuestaAdmin) {
+		this.respuestaAdmin = respuestaAdmin;
 	}
 }

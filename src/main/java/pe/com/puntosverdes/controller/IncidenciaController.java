@@ -93,7 +93,7 @@ public class IncidenciaController {
 	}
 
 	// SUBIR ARCHIVOS RELACIONADOS A UNA INCIDENCIA
-	@PostMapping("/{id}/incidencias")
+	@PostMapping("/{id}/archivos")
 	public ResponseEntity<Map<String, Object>> subirArchivos(@PathVariable Long id,
 			@RequestParam("files") List<MultipartFile> files) {
 		try {

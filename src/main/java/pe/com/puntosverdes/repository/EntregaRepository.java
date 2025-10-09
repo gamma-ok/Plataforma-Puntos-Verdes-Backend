@@ -9,7 +9,14 @@ import java.util.List;
 public interface EntregaRepository extends JpaRepository<Entrega, Long> {
     List<Entrega> findByCiudadanoId(Long ciudadanoId);
     List<Entrega> findByRecolectorId(Long recolectorId);
-    List<Entrega> findByValidadaTrue();
+    List<Entrega> findByEstado(String estado);
+    List<Entrega> findByCampaniaId(Long campaniaId);
+    List<Entrega> findByPuntoVerdeId(Long puntoVerdeId);
+    List<Entrega> findByCampaniaIdAndEstado(Long campaniaId, String estado);
+    List<Entrega> findByPuntoVerdeIdAndEstado(Long puntoVerdeId, String estado);
+    List<Entrega> findByCampaniaIsNotNull();
+    List<Entrega> findByPuntoVerdeIsNotNull();
+    List<Entrega> findByCampaniaIsNotNullAndEstado(String estado);
+    List<Entrega> findByPuntoVerdeIsNotNullAndEstado(String estado);
     Entrega findTopByCiudadanoIdOrderByFechaEntregaDesc(Long ciudadanoId);
-    long countByValidadaTrue();
 }

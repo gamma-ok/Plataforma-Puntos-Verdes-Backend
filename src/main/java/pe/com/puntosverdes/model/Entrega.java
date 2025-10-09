@@ -14,6 +14,19 @@ public class Entrega {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private String material;
+	private Double cantidad;
+	private String unidad;
+
+	private LocalDateTime fechaEntrega = LocalDateTime.now();
+	private String estado = "PENDIENTE";
+
+	private int puntosGanados = 0;
+	private String observaciones;
+	private String respuestaAdmin;
+
+	private LocalDateTime fechaValidacion;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ciudadano_id", nullable = false)
 	@JsonIgnoreProperties({ "usuarioRoles" })
@@ -25,7 +38,7 @@ public class Entrega {
 	private Usuario recolector;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "punto_verde_id", nullable = false)
+	@JoinColumn(name = "punto_verde_id")
 	private PuntoVerde puntoVerde;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -33,40 +46,17 @@ public class Entrega {
 	@JsonIgnoreProperties({ "entregas" })
 	private Campania campania;
 
-	private String material;
-	private Double cantidad;
-	private String unidad;
-
-	private LocalDateTime fechaEntrega = LocalDateTime.now();
-
-	private boolean validada = false;
-	private LocalDateTime fechaValidacion;
-	private String observaciones;
-
-	private int puntosGanados = 0;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "validado_por_id")
+	@JsonIgnoreProperties({ "usuarioRoles" })
+	private Usuario validadoPor;
 
 	@ElementCollection
-	@CollectionTable(name = "entrega_evidencias", joinColumns = @JoinColumn(name = "entrega_id"))
-	@Column(name = "url")
-	private List<String> evidencias = new ArrayList<>();
-
-	@Column(length = 2000)
-	private String respuestaAdmin;
-
-	private String validadoPor;
+	@CollectionTable(name = "entrega_archivos", joinColumns = @JoinColumn(name = "entrega_id"))
+	@Column(name = "archivo_nombre")
+	private List<String> entregaArchivos = new ArrayList<>();
 
 	public Entrega() {
-	}
-
-	public Entrega(Usuario ciudadano, PuntoVerde puntoVerde, String material, Double cantidad, String unidad) {
-		this.ciudadano = ciudadano;
-		this.puntoVerde = puntoVerde;
-		this.material = material;
-		this.cantidad = cantidad;
-		this.unidad = unidad;
-		this.fechaEntrega = LocalDateTime.now();
-		this.validada = false;
-		this.puntosGanados = 0;
 	}
 
 	public Long getId() {
@@ -75,38 +65,6 @@ public class Entrega {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Usuario getCiudadano() {
-		return ciudadano;
-	}
-
-	public void setCiudadano(Usuario ciudadano) {
-		this.ciudadano = ciudadano;
-	}
-
-	public Usuario getRecolector() {
-		return recolector;
-	}
-
-	public void setRecolector(Usuario recolector) {
-		this.recolector = recolector;
-	}
-
-	public PuntoVerde getPuntoVerde() {
-		return puntoVerde;
-	}
-
-	public void setPuntoVerde(PuntoVerde puntoVerde) {
-		this.puntoVerde = puntoVerde;
-	}
-
-	public Campania getCampania() {
-		return campania;
-	}
-
-	public void setCampania(Campania campania) {
-		this.campania = campania;
 	}
 
 	public String getMaterial() {
@@ -141,28 +99,12 @@ public class Entrega {
 		this.fechaEntrega = fechaEntrega;
 	}
 
-	public boolean isValidada() {
-		return validada;
+	public String getEstado() {
+		return estado;
 	}
 
-	public void setValidada(boolean validada) {
-		this.validada = validada;
-	}
-
-	public LocalDateTime getFechaValidacion() {
-		return fechaValidacion;
-	}
-
-	public void setFechaValidacion(LocalDateTime fechaValidacion) {
-		this.fechaValidacion = fechaValidacion;
-	}
-
-	public String getObservaciones() {
-		return observaciones;
-	}
-
-	public void setObservaciones(String observaciones) {
-		this.observaciones = observaciones;
+	public void setEstado(String estado) {
+		this.estado = estado;
 	}
 
 	public int getPuntosGanados() {
@@ -173,12 +115,12 @@ public class Entrega {
 		this.puntosGanados = puntosGanados;
 	}
 
-	public List<String> getEvidencias() {
-		return evidencias;
+	public String getObservaciones() {
+		return observaciones;
 	}
 
-	public void setEvidencias(List<String> evidencias) {
-		this.evidencias = evidencias;
+	public void setObservaciones(String observaciones) {
+		this.observaciones = observaciones;
 	}
 
 	public String getRespuestaAdmin() {
@@ -189,11 +131,59 @@ public class Entrega {
 		this.respuestaAdmin = respuestaAdmin;
 	}
 
-	public String getValidadoPor() {
+	public LocalDateTime getFechaValidacion() {
+		return fechaValidacion;
+	}
+
+	public void setFechaValidacion(LocalDateTime fechaValidacion) {
+		this.fechaValidacion = fechaValidacion;
+	}
+
+	public Usuario getCiudadano() {
+		return ciudadano;
+	}
+
+	public void setCiudadano(Usuario ciudadano) {
+		this.ciudadano = ciudadano;
+	}
+
+	public Usuario getRecolector() {
+		return recolector;
+	}
+
+	public void setRecolector(Usuario recolector) {
+		this.recolector = recolector;
+	}
+
+	public Usuario getValidadoPor() {
 		return validadoPor;
 	}
 
-	public void setValidadoPor(String validadoPor) {
+	public void setValidadoPor(Usuario validadoPor) {
 		this.validadoPor = validadoPor;
+	}
+
+	public PuntoVerde getPuntoVerde() {
+		return puntoVerde;
+	}
+
+	public void setPuntoVerde(PuntoVerde puntoVerde) {
+		this.puntoVerde = puntoVerde;
+	}
+
+	public Campania getCampania() {
+		return campania;
+	}
+
+	public void setCampania(Campania campania) {
+		this.campania = campania;
+	}
+
+	public List<String> getEntregaArchivos() {
+		return entregaArchivos;
+	}
+
+	public void setEntregaArchivos(List<String> entregaArchivos) {
+		this.entregaArchivos = entregaArchivos;
 	}
 }

@@ -27,7 +27,6 @@ public class ReporteController {
 	public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
 		Map<String, Object> estadisticas = new HashMap<>();
 		estadisticas.put("totalUsuarios", usuarioService.listarUsuarios().size());
-		estadisticas.put("totalEntregas", entregaService.listarEntregasDTO().size());
 		estadisticas.put("totalRecompensas", recompensaService.listarRecompensas().size());
 		return ResponseEntity.ok(estadisticas);
 	}

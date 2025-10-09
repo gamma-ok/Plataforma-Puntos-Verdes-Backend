@@ -42,7 +42,7 @@ public class PuntoVerdeController {
 	}
 
 	// Actualizar
-	@PutMapping("/{id}/actualizar")
+	@PutMapping("/actualizar/{id}")
 	public ResponseEntity<PuntoVerdeDTO> actualizar(@PathVariable Long id, @RequestBody PuntoVerdeRegistroDTO dto) {
 		PuntoVerde datos = new PuntoVerde();
 		datos.setNombre(dto.getNombre());
@@ -63,7 +63,7 @@ public class PuntoVerdeController {
 	}
 
 	// Listar por estado (true/false)
-	@GetMapping("/estado/{activo}")
+	@GetMapping("listar//estado/{activo}")
 	public ResponseEntity<List<PuntoVerdeDTO>> listarPorEstado(@PathVariable boolean activo) {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDTOList(puntoVerdeService.listarPorEstado(activo)));
 	}

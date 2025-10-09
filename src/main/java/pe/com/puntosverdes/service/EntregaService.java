@@ -1,18 +1,21 @@
 package pe.com.puntosverdes.service;
 
 import pe.com.puntosverdes.dto.*;
-import pe.com.puntosverdes.model.Entrega;
 import java.util.List;
 
 public interface EntregaService {
-    Entrega registrarEntrega(Entrega entrega);
-    List<EntregaListadoDTO> listarEntregasDTO();
-    List<EntregaListadoDTO> listarEntregasPorUsuario(Long usuarioId);
-    List<EntregaListadoDTO> listarEntregasPorEstado(String estado); // 🔹 Añadido
-    EntregaValidadaDTO validarEntrega(Long entregaId, boolean validada, int puntosGanados,
-                                       String respuestaAdmin, String observaciones, Long recolectorId);
-    EntregaValidadaDTO rechazarEntrega(Long entregaId, String motivoRechazo, String respuestaAdmin);
-    UltimaEntregaDTO obtenerUltimaEntregaPorCiudadano(Long ciudadanoId);
-    List<EntregaHistorialDTO> listarHistorialPorCiudadano(Long ciudadanoId);
-    Entrega subirEvidencias(Long entregaId, List<String> rutasEvidencias);
+    EntregaDTO registrarEntrega(pe.com.puntosverdes.model.Entrega entrega);
+    List<EntregaDTO> listarEntregas();
+    List<EntregaDTO> listarPorUsuario(Long usuarioId);
+    List<EntregaDTO> listarPorEstado(String estado);
+    List<EntregaDTO> listarRelacionadasConCampanias();
+    List<EntregaDTO> listarRelacionadasConPuntosVerdes();
+    List<EntregaDTO> listarRelacionadasConCampaniasPorEstado(String estado);
+    List<EntregaDTO> listarRelacionadasConPuntosVerdesPorEstado(String estado);
+    List<EntregaDTO> listarPorRol(String rol);
+    EntregaDTO validarEntrega(Long entregaId, EntregaValidacionDTO dto, Long adminId);
+    EntregaDTO subirArchivos(Long entregaId, List<String> nombresArchivos);
+    EntregaDTO obtenerPorId(Long entregaId);
+    EntregaDTO obtenerUltimaEntregaPorUsuario(Long usuarioId);
+    void eliminarEntrega(Long entregaId);
 }
