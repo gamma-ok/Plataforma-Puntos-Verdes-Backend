@@ -6,7 +6,7 @@ public class PuntoVerdeRegistroDTO {
 	private String descripcion;
 	private Double latitud;
 	private Double longitud;
-	private boolean activo;
+	private Boolean activo;
 
 	public PuntoVerdeRegistroDTO() {
 	}
@@ -51,11 +51,11 @@ public class PuntoVerdeRegistroDTO {
 		this.longitud = longitud;
 	}
 
-	public boolean isActivo() {
+	public Boolean getActivo() {
 		return activo;
 	}
 
-	public void setActivo(boolean activo) {
+	public void setActivo(Boolean activo) {
 		this.activo = activo;
 	}
 }

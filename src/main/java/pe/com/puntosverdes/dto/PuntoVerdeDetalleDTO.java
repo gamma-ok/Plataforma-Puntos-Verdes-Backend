@@ -11,6 +11,7 @@ public class PuntoVerdeDetalleDTO {
 	private Double longitud;
 	private boolean activo;
 	private LocalDateTime fechaRegistro;
+	private LocalDateTime fechaActualizacion;
 	private String creadoPorNombre;
 	private int totalEntregas;
 
@@ -76,6 +77,14 @@ public class PuntoVerdeDetalleDTO {
 
 	public void setFechaRegistro(LocalDateTime fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
+	}
+
+	public LocalDateTime getFechaActualizacion() {
+		return fechaActualizacion;
+	}
+
+	public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
 	}
 
 	public String getCreadoPorNombre() {

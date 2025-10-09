@@ -34,7 +34,9 @@ public class PuntoVerdeController {
 		punto.setDescripcion(dto.getDescripcion());
 		punto.setLatitud(dto.getLatitud());
 		punto.setLongitud(dto.getLongitud());
-		punto.setActivo(dto.isActivo());
+
+		// activo: si no nos envían valor (null) lo creamos como true por defecto
+		punto.setActivo(dto.getActivo() == null ? true : dto.getActivo());
 		punto.setCreadoPor(creador);
 
 		PuntoVerde guardado = puntoVerdeService.crearPuntoVerde(punto);
@@ -50,7 +52,7 @@ public class PuntoVerdeController {
 		datos.setDescripcion(dto.getDescripcion());
 		datos.setLatitud(dto.getLatitud());
 		datos.setLongitud(dto.getLongitud());
-		datos.setActivo(dto.isActivo());
+		datos.setActivo(dto.getActivo() == null ? true : dto.getActivo());
 
 		PuntoVerde actualizado = puntoVerdeService.actualizarPuntoVerde(id, datos);
 		return ResponseEntity.ok(PuntoVerdeMapper.toDTO(actualizado));
@@ -63,19 +65,31 @@ public class PuntoVerdeController {
 	}
 
 	// Listar por estado (true/false)
-	@GetMapping("listar//estado/{activo}")
+	@GetMapping("/listar/estado/{activo}")
 	public ResponseEntity<List<PuntoVerdeDTO>> listarPorEstado(@PathVariable boolean activo) {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDTOList(puntoVerdeService.listarPorEstado(activo)));
 	}
 
-	// Buscar por nombre
-	@GetMapping("/buscar")
+	// Listar por usuario creador
+	@GetMapping("/listar/usuario/{usuarioId}")
+	public ResponseEntity<List<PuntoVerdeDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
+		return ResponseEntity.ok(PuntoVerdeMapper.toDTOList(puntoVerdeService.listarPorCreador(usuarioId)));
+	}
+
+	// Listar por rol del creador (ADMIN / MUNICIPALIDAD)
+	@GetMapping("/listar/rol/{rol}")
+	public ResponseEntity<List<PuntoVerdeDTO>> listarPorRol(@PathVariable String rol) {
+		return ResponseEntity.ok(PuntoVerdeMapper.toDTOList(puntoVerdeService.listarPorRolCreador(rol)));
+	}
+
+	// Buscar por nombre (query param)
+	@GetMapping("/buscar/nombre")
 	public ResponseEntity<List<PuntoVerdeDTO>> buscarPorNombre(@RequestParam String nombre) {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDTOList(puntoVerdeService.buscarPorNombre(nombre)));
 	}
 
-	// Detalle
-	@GetMapping("/{id}/detalle")
+	// Detalle por id
+	@GetMapping("/detalle/{id}")
 	public ResponseEntity<PuntoVerdeDetalleDTO> obtenerPorId(@PathVariable Long id) {
 		PuntoVerde pv = puntoVerdeService.obtenerPorId(id);
 		if (pv == null)
@@ -83,7 +97,7 @@ public class PuntoVerdeController {
 		return ResponseEntity.ok(PuntoVerdeMapper.toDetalleDTO(pv));
 	}
 
-	// Estadisticas generales
+	// Estadisticas
 	@GetMapping("/estadisticas")
 	public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
 		List<PuntoVerde> puntos = puntoVerdeService.listarPuntosVerdes();
@@ -96,6 +110,8 @@ public class PuntoVerdeController {
 
 		PuntoVerde masUsado = puntos.stream().max(Comparator.comparingInt(p -> p.getEntregas().size())).orElse(null);
 
+		PuntoVerde menosUsado = puntos.stream().min(Comparator.comparingInt(p -> p.getEntregas().size())).orElse(null);
+
 		Map<String, Object> estadisticas = new HashMap<>();
 		estadisticas.put("totalPuntosVerdes", total);
 		estadisticas.put("puntosActivos", activos);
@@ -103,6 +119,9 @@ public class PuntoVerdeController {
 		estadisticas.put("promedioEntregasPorPunto", promedioEntregas);
 		estadisticas.put("puntoVerdeMasUsado",
 				masUsado != null ? masUsado.getNombre() + " (" + masUsado.getEntregas().size() + " entregas)" : "N/A");
+		estadisticas.put("puntoVerdeMenosUsado",
+				menosUsado != null ? menosUsado.getNombre() + " (" + menosUsado.getEntregas().size() + " entregas)"
+						: "N/A");
 
 		return ResponseEntity.ok(estadisticas);
 	}

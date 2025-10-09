@@ -14,7 +14,7 @@ public class PuntoVerdeMapper {
 				: "Desconocido";
 
 		return new PuntoVerdeDTO(pv.getId(), pv.getNombre(), pv.getDireccion(), pv.getDescripcion(), pv.getLatitud(),
-				pv.getLongitud(), pv.isActivo(), creador);
+				pv.getLongitud(), pv.isActivo(), creador, pv.getFechaRegistro(), pv.getFechaActualizacion());
 	}
 
 	public static PuntoVerdeDetalleDTO toDetalleDTO(PuntoVerde pv) {
@@ -27,10 +27,11 @@ public class PuntoVerdeMapper {
 		dto.setLongitud(pv.getLongitud());
 		dto.setActivo(pv.isActivo());
 		dto.setFechaRegistro(pv.getFechaRegistro());
+		dto.setFechaActualizacion(pv.getFechaActualizacion());
 		dto.setCreadoPorNombre(
 				pv.getCreadoPor() != null ? pv.getCreadoPor().getNombre() + " " + pv.getCreadoPor().getApellido()
 						: "Desconocido");
-		dto.setTotalEntregas(pv.getEntregas().size());
+		dto.setTotalEntregas(pv.getEntregas() != null ? pv.getEntregas().size() : 0);
 		return dto;
 	}
 

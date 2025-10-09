@@ -11,4 +11,6 @@ public interface PuntoVerdeService {
     List<PuntoVerde> buscarPorNombre(String nombre);
     PuntoVerde actualizarPuntoVerde(Long id, PuntoVerde datos);
     void eliminarPuntoVerde(Long id);
+    List<PuntoVerde> listarPorCreador(Long usuarioId);
+    List<PuntoVerde> listarPorRolCreador(String rol);
 }

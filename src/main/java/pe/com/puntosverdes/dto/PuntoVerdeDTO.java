@@ -1,5 +1,7 @@
 package pe.com.puntosverdes.dto;
 
+import java.time.LocalDateTime;
+
 public class PuntoVerdeDTO {
 	private Long id;
 	private String nombre;
@@ -9,12 +11,14 @@ public class PuntoVerdeDTO {
 	private Double longitud;
 	private boolean activo;
 	private String creadoPor;
+	private LocalDateTime fechaRegistro;
+	private LocalDateTime fechaActualizacion;
 
 	public PuntoVerdeDTO() {
 	}
 
 	public PuntoVerdeDTO(Long id, String nombre, String direccion, String descripcion, Double latitud, Double longitud,
-			boolean activo, String creadoPor) {
+			boolean activo, String creadoPor, LocalDateTime fechaRegistro, LocalDateTime fechaActualizacion) {
 		this.id = id;
 		this.nombre = nombre;
 		this.direccion = direccion;
@@ -23,6 +27,8 @@ public class PuntoVerdeDTO {
 		this.longitud = longitud;
 		this.activo = activo;
 		this.creadoPor = creadoPor;
+		this.fechaRegistro = fechaRegistro;
+		this.fechaActualizacion = fechaActualizacion;
 	}
 
 	public Long getId() {
@@ -87,5 +93,21 @@ public class PuntoVerdeDTO {
 
 	public void setCreadoPor(String creadoPor) {
 		this.creadoPor = creadoPor;
+	}
+
+	public LocalDateTime getFechaRegistro() {
+		return fechaRegistro;
+	}
+
+	public void setFechaRegistro(LocalDateTime fechaRegistro) {
+		this.fechaRegistro = fechaRegistro;
+	}
+
+	public LocalDateTime getFechaActualizacion() {
+		return fechaActualizacion;
+	}
+
+	public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
 	}
 }

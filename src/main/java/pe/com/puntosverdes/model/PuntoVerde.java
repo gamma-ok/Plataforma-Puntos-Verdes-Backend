@@ -23,6 +23,7 @@ public class PuntoVerde {
 	private boolean activo = true;
 
 	private LocalDateTime fechaRegistro = LocalDateTime.now();
+	private LocalDateTime fechaActualizacion = LocalDateTime.now();
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creado_por_id")
@@ -46,8 +47,10 @@ public class PuntoVerde {
 		this.creadoPor = creadoPor;
 		this.activo = true;
 		this.fechaRegistro = LocalDateTime.now();
+		this.fechaActualizacion = LocalDateTime.now();
 	}
 
+	// getters y setters
 	public Long getId() {
 		return id;
 	}
@@ -110,6 +113,14 @@ public class PuntoVerde {
 
 	public void setFechaRegistro(LocalDateTime fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
+	}
+
+	public LocalDateTime getFechaActualizacion() {
+		return fechaActualizacion;
+	}
+
+	public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
 	}
 
 	public Usuario getCreadoPor() {

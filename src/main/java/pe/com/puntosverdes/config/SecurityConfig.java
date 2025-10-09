@@ -97,6 +97,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/recompensas/**").authenticated()
 				.requestMatchers(HttpMethod.POST, "/api/recompensas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.PUT, "/api/recompensas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/listar/rol/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.DELETE, "/api/recompensas/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				
 				// PUNTOS VERDES
@@ -104,6 +105,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.PUT, "/api/puntos-verdes/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.DELETE, "/api/puntos-verdes/**").hasAnyRole("ADMIN")
+
 
 				// CAMPAÑAS
 				.requestMatchers(HttpMethod.GET, "/api/campanias/**").authenticated()

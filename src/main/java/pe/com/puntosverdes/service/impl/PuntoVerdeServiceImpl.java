@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pe.com.puntosverdes.model.PuntoVerde;
 import pe.com.puntosverdes.repository.PuntoVerdeRepository;
 import pe.com.puntosverdes.service.PuntoVerdeService;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -15,6 +16,9 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 
 	@Override
 	public PuntoVerde crearPuntoVerde(PuntoVerde puntoVerde) {
+		if (puntoVerde.getFechaRegistro() == null)
+			puntoVerde.setFechaRegistro(LocalDateTime.now());
+		puntoVerde.setFechaActualizacion(LocalDateTime.now());
 		return puntoVerdeRepository.save(puntoVerde);
 	}
 
@@ -30,7 +34,7 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 
 	@Override
 	public List<PuntoVerde> listarPorEstado(boolean activo) {
-		return puntoVerdeRepository.findByActivoTrue().stream().filter(p -> p.isActivo() == activo).toList();
+		return activo ? puntoVerdeRepository.findByActivoTrue() : puntoVerdeRepository.findByActivoFalse();
 	}
 
 	@Override
@@ -38,7 +42,6 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 		return puntoVerdeRepository.findByNombreContainingIgnoreCase(nombre);
 	}
 
-	// Actualizar
 	@Override
 	public PuntoVerde actualizarPuntoVerde(Long id, PuntoVerde datos) {
 		PuntoVerde existente = puntoVerdeRepository.findById(id)
@@ -54,15 +57,28 @@ public class PuntoVerdeServiceImpl implements PuntoVerdeService {
 			existente.setLatitud(datos.getLatitud());
 		if (datos.getLongitud() != null)
 			existente.setLongitud(datos.getLongitud());
+
 		existente.setActivo(datos.isActivo());
+
+		existente.setFechaActualizacion(LocalDateTime.now());
 
 		return puntoVerdeRepository.save(existente);
 	}
-	
+
 	@Override
 	public void eliminarPuntoVerde(Long id) {
-	    PuntoVerde existente = puntoVerdeRepository.findById(id)
-	            .orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con ID: " + id));
-	    puntoVerdeRepository.delete(existente);
+		PuntoVerde existente = puntoVerdeRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Punto Verde no encontrado con ID: " + id));
+		puntoVerdeRepository.delete(existente);
+	}
+
+	@Override
+	public List<PuntoVerde> listarPorCreador(Long usuarioId) {
+		return puntoVerdeRepository.findByCreadoPorId(usuarioId);
+	}
+
+	@Override
+	public List<PuntoVerde> listarPorRolCreador(String rol) {
+		return puntoVerdeRepository.findByCreadoPorUsuarioRolesRolRolNombre(rol);
 	}
 }
