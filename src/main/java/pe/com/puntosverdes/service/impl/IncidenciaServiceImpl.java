@@ -99,4 +99,19 @@ public class IncidenciaServiceImpl implements IncidenciaService {
 				i.getRespuesta(), i.getFechaReporte(), i.getFechaRespuesta(), reportadoPor, rolReportado, validadoPor,
 				rolValidado, i.getIncidenciasArchivos());
 	}
+
+	@Override
+	public List<IncidenciaDTO> listarPorNombreUsuario(String nombre) {
+		return incidenciaRepository
+				.findByReportadoPor_NombreContainingIgnoreCaseOrReportadoPor_ApellidoContainingIgnoreCase(nombre,
+						nombre)
+				.stream().map(this::convertirADTO).collect(Collectors.toList());
+	}
+
+	@Override
+	public void eliminarIncidencia(Long id) {
+		Incidencia incidencia = incidenciaRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Incidencia no encontrada con ID: " + id));
+		incidenciaRepository.delete(incidencia);
+	}
 }

@@ -42,7 +42,7 @@ public class CanjeController {
 		}
 	}
 
-	// Listar todos los canjes
+	// Listar
 	@GetMapping("/listar")
 	public ResponseEntity<List<CanjeDTO>> listar() {
 		List<CanjeDTO> lista = canjeService.listarCanjes().stream().map(this::convertirADTO)
@@ -50,10 +50,26 @@ public class CanjeController {
 		return ResponseEntity.ok(lista);
 	}
 
-	// Listar por usuario
-	@GetMapping("/usuario/{usuarioId}")
+	// Listar por usuario (ID)
+	@GetMapping("/listar/usuario/id/{usuarioId}")
 	public ResponseEntity<List<CanjeDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
 		List<CanjeDTO> lista = canjeService.listarPorUsuario(usuarioId).stream().map(this::convertirADTO)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(lista);
+	}
+
+	// Listar canjes por nombre o apellido de usuario
+	@GetMapping("/listar/usuario/nombre/{nombre}")
+	public ResponseEntity<List<CanjeDTO>> listarPorNombre(@PathVariable String nombre) {
+		List<CanjeDTO> lista = canjeService.listarPorNombreUsuario(nombre).stream().map(this::convertirADTO)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(lista);
+	}
+
+	// Listar canjes por ROL (CIUDADANO / RECOLECTOR)
+	@GetMapping("/listar/rol/{rol}")
+	public ResponseEntity<List<CanjeDTO>> listarPorRol(@PathVariable String rol) {
+		List<CanjeDTO> lista = canjeService.listarPorRolUsuario(rol).stream().map(this::convertirADTO)
 				.collect(Collectors.toList());
 		return ResponseEntity.ok(lista);
 	}

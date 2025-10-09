@@ -9,6 +9,7 @@ import java.util.List;
 public interface PuntoVerdeRepository extends JpaRepository<PuntoVerde, Long> {
     List<PuntoVerde> findByActivoTrue();
     List<PuntoVerde> findByActivoFalse();
-    List<PuntoVerde> findByNombreContainingIgnoreCase(String nombre);    List<PuntoVerde> findByCreadoPorId(Long usuarioId);
+    List<PuntoVerde> findByNombreContainingIgnoreCase(String nombre);
+    List<PuntoVerde> findByCreadoPorId(Long usuarioId);
     List<PuntoVerde> findByCreadoPorUsuarioRolesRolRolNombre(String rol);
 }

@@ -10,5 +10,7 @@ public interface CanjeService {
     Canje obtenerPorId(Long id);
     List<Canje> listarCanjes();
     List<Canje> listarPorUsuario(Long usuarioId);
+    List<Canje> listarPorNombreUsuario(String nombre);
+    List<Canje> listarPorRolUsuario(String rol);
     void eliminarCanje(Long id);
 }

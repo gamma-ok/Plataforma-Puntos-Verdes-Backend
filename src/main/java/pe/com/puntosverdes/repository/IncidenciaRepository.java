@@ -7,7 +7,8 @@ import java.util.List;
 
 @Repository
 public interface IncidenciaRepository extends JpaRepository<Incidencia, Long> {
-    List<Incidencia> findByReportadoPorId(Long usuarioId);
-    List<Incidencia> findByEstado(String estado);
-    Incidencia findTopByReportadoPorIdOrderByFechaReporteDesc(Long usuarioId);
+	List<Incidencia> findByReportadoPorId(Long usuarioId);
+	List<Incidencia> findByEstado(String estado);
+	Incidencia findTopByReportadoPorIdOrderByFechaReporteDesc(Long usuarioId);
+	List<Incidencia> findByReportadoPor_NombreContainingIgnoreCaseOrReportadoPor_ApellidoContainingIgnoreCase(String nombre, String apellido);
 }

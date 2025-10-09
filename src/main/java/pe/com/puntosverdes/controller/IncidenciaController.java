@@ -72,6 +72,11 @@ public class IncidenciaController {
 		return ResponseEntity.ok(incidenciaService.listarPorUsuario(usuarioId));
 	}
 
+	@GetMapping("/listar/nombre/{nombre}")
+	public ResponseEntity<List<IncidenciaDTO>> listarPorNombreUsuario(@PathVariable String nombre) {
+		return ResponseEntity.ok(incidenciaService.listarPorNombreUsuario(nombre));
+	}
+
 	// OBTENER DETALLE DE INCIDENCIA POR ID
 	@GetMapping("/detalle/{id}")
 	public ResponseEntity<IncidenciaDTO> obtenerPorId(@PathVariable Long id) {
@@ -142,5 +147,11 @@ public class IncidenciaController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
+	}
+
+	@DeleteMapping("/eliminar/{id}")
+	public ResponseEntity<Void> eliminarIncidencia(@PathVariable Long id) {
+		incidenciaService.eliminarIncidencia(id);
+		return ResponseEntity.noContent().build();
 	}
 }

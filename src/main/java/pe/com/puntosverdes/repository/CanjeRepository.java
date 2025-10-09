@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface CanjeRepository extends JpaRepository<Canje, Long> {
     List<Canje> findByUsuarioId(Long usuarioId);
-    List<Canje> findByfechaCanjeBetween(LocalDateTime inicio, LocalDateTime fin);
+    List<Canje> findByFechaCanjeBetween(LocalDateTime inicio, LocalDateTime fin);
+    List<Canje> findByUsuarioNombreContainingIgnoreCaseOrUsuarioApellidoContainingIgnoreCase(String nombre, String apellido);
 }

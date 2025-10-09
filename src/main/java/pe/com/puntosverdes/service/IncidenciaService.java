@@ -14,4 +14,6 @@ public interface IncidenciaService {
     IncidenciaDTO obtenerUltimaPorUsuario(Long usuarioId);
     IncidenciaDTO validarIncidencia(Long incidenciaId, IncidenciaValidacionDTO dto, Long adminId);
     IncidenciaDTO subirArchivos(Long incidenciaId, List<String> nombresArchivos);
+    List<IncidenciaDTO> listarPorNombreUsuario(String nombre);
+    void eliminarIncidencia(Long id);
 }
