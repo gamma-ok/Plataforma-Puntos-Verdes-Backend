@@ -50,7 +50,6 @@ public class PuntoVerde {
 		this.fechaActualizacion = LocalDateTime.now();
 	}
 
-	// getters y setters
 	public Long getId() {
 		return id;
 	}

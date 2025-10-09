@@ -9,6 +9,8 @@ public interface CampaniaService {
     Campania obtenerPorId(Long id);
     List<Campania> listarCampanias();
     List<Campania> listarPorEstado(boolean activa);
+    List<Campania> listarPorUsuario(Long usuarioId);
+    List<Campania> listarPorRol(String rol);
     List<Campania> buscarCampaniaPorTitulo(String titulo);
     List<Campania> buscarCampaniaPorUbicacion(String ubicacion);
     Campania actualizarCampania(Long id, Campania datos);

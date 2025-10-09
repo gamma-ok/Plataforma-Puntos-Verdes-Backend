@@ -12,10 +12,13 @@ public class CampaniaDTO {
 	private int puntosExtra;
 	private LocalDateTime fechaInicio;
 	private LocalDateTime fechaFin;
+	private LocalDateTime fechaRegistro;
+	private LocalDateTime fechaActualizacion;
 	private String creadoPorNombre;
 
 	public CampaniaDTO(Long id, String titulo, String descripcion, String ubicacion, boolean activa, int puntosExtra,
-			LocalDateTime fechaInicio, LocalDateTime fechaFin, String creadoPorNombre) {
+			LocalDateTime fechaInicio, LocalDateTime fechaFin, LocalDateTime fechaRegistro,
+			LocalDateTime fechaActualizacion, String creadoPorNombre) {
 		this.id = id;
 		this.titulo = titulo;
 		this.descripcion = descripcion;
@@ -24,10 +27,11 @@ public class CampaniaDTO {
 		this.puntosExtra = puntosExtra;
 		this.fechaInicio = fechaInicio;
 		this.fechaFin = fechaFin;
+		this.fechaRegistro = fechaRegistro;
+		this.fechaActualizacion = fechaActualizacion;
 		this.creadoPorNombre = creadoPorNombre;
 	}
 
-	// Getters & Setters
 	public Long getId() {
 		return id;
 	}
@@ -58,6 +62,14 @@ public class CampaniaDTO {
 
 	public LocalDateTime getFechaFin() {
 		return fechaFin;
+	}
+
+	public LocalDateTime getFechaRegistro() {
+		return fechaRegistro;
+	}
+
+	public LocalDateTime getFechaActualizacion() {
+		return fechaActualizacion;
 	}
 
 	public String getCreadoPorNombre() {

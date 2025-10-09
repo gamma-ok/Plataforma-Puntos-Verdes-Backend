@@ -27,6 +27,9 @@ public class Campania {
 	private boolean activa = true;
 	private int puntosExtra = 0;
 
+	private LocalDateTime fechaRegistro;
+	private LocalDateTime fechaActualizacion;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creado_por_id")
 	@JsonIgnore
@@ -37,17 +40,24 @@ public class Campania {
 	private Set<Entrega> entregas = new HashSet<>();
 
 	@PrePersist
-	public void validarFechas() {
+	public void onCreate() {
 		if (fechaFin != null && fechaInicio != null && fechaFin.isBefore(fechaInicio)) {
 			throw new RuntimeException("La fecha de fin no puede ser anterior a la fecha de inicio.");
 		}
+		this.fechaRegistro = LocalDateTime.now();
+		this.fechaActualizacion = this.fechaRegistro;
+	}
+
+	@PreUpdate
+	public void onUpdate() {
+		this.fechaActualizacion = LocalDateTime.now();
 	}
 
 	public Campania() {
 	}
 
-	public Campania(String titulo, String descripcion, String descripcionCorta, LocalDateTime fechaInicio,
-			LocalDateTime fechaFin, String ubicacion, int puntosExtra, Usuario creadoPor) {
+	public Campania(String titulo, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin,
+			String ubicacion, int puntosExtra, Usuario creadoPor) {
 		this.titulo = titulo;
 		this.descripcion = descripcion;
 		this.fechaInicio = fechaInicio;
@@ -120,6 +130,22 @@ public class Campania {
 
 	public void setPuntosExtra(int puntosExtra) {
 		this.puntosExtra = puntosExtra;
+	}
+
+	public LocalDateTime getFechaRegistro() {
+		return fechaRegistro;
+	}
+
+	public void setFechaRegistro(LocalDateTime fechaRegistro) {
+		this.fechaRegistro = fechaRegistro;
+	}
+
+	public LocalDateTime getFechaActualizacion() {
+		return fechaActualizacion;
+	}
+
+	public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
 	}
 
 	public Usuario getCreadoPor() {

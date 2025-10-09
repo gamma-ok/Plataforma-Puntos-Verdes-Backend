@@ -17,7 +17,7 @@ public class CampaniaMapper {
 
 		return new CampaniaDTO(campania.getId(), campania.getTitulo(), campania.getDescripcion(),
 				campania.getUbicacion(), campania.isActiva(), campania.getPuntosExtra(), campania.getFechaInicio(),
-				campania.getFechaFin(), creadoPorNombre);
+				campania.getFechaFin(), campania.getFechaRegistro(), campania.getFechaActualizacion(), creadoPorNombre);
 	}
 
 	public static CampaniaDetalleDTO toDetalleDTO(Campania campania) {
@@ -30,6 +30,8 @@ public class CampaniaMapper {
 		dto.setPuntosExtra(campania.getPuntosExtra());
 		dto.setFechaInicio(campania.getFechaInicio());
 		dto.setFechaFin(campania.getFechaFin());
+		dto.setFechaRegistro(campania.getFechaRegistro());
+		dto.setFechaActualizacion(campania.getFechaActualizacion());
 
 		if (campania.getCreadoPor() != null) {
 			dto.setCreadoPorNombre(campania.getCreadoPor().getNombre() + " " + campania.getCreadoPor().getApellido());

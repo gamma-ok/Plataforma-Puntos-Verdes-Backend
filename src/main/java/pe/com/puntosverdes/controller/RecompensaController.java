@@ -25,7 +25,7 @@ public class RecompensaController {
 	private UsuarioService usuarioService;
 
 	// Crear recompensa (ADMIN / MUNICIPALIDAD)
-	@PostMapping("/crear")
+	@PostMapping("/registrar")
 	public ResponseEntity<RecompensaDTO> crearRecompensa(@RequestBody Recompensa recompensa, Authentication auth) {
 		Usuario creador = usuarioService.obtenerUsuarioPorUsername(auth.getName());
 		recompensa.setCreadoPor(creador);
@@ -35,7 +35,7 @@ public class RecompensaController {
 	}
 
 	// Actualizar recompensa (ADMIN / MUNICIPALIDAD)
-	@PutMapping("/{id}/actualizar")
+	@PutMapping("/actualizar/{id}")
 	public ResponseEntity<RecompensaDTO> actualizarRecompensa(@PathVariable Long id, @RequestBody Recompensa datos) {
 		Recompensa actualizada = recompensaService.actualizarRecompensa(id, datos);
 		return ResponseEntity.ok(recompensaService.convertirADTO(actualizada));

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class CampaniaDetalleDTO {
+
 	private Long id;
 	private String titulo;
 	private String descripcion;
@@ -12,6 +13,8 @@ public class CampaniaDetalleDTO {
 	private int puntosExtra;
 	private LocalDateTime fechaInicio;
 	private LocalDateTime fechaFin;
+	private LocalDateTime fechaRegistro;
+	private LocalDateTime fechaActualizacion;
 	private String creadoPorNombre;
 	private String creadoPorRol;
 	private List<String> entregas;
@@ -81,6 +84,22 @@ public class CampaniaDetalleDTO {
 
 	public void setFechaFin(LocalDateTime fechaFin) {
 		this.fechaFin = fechaFin;
+	}
+
+	public LocalDateTime getFechaRegistro() {
+		return fechaRegistro;
+	}
+
+	public void setFechaRegistro(LocalDateTime fechaRegistro) {
+		this.fechaRegistro = fechaRegistro;
+	}
+
+	public LocalDateTime getFechaActualizacion() {
+		return fechaActualizacion;
+	}
+
+	public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
+		this.fechaActualizacion = fechaActualizacion;
 	}
 
 	public String getCreadoPorNombre() {

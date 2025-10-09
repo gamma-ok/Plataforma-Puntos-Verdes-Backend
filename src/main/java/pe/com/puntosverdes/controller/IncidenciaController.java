@@ -79,13 +79,13 @@ public class IncidenciaController {
 	}
 
 	// OBTENER ÚLTIMA INCIDENCIA REPORTADA POR UN USUARIO
-	@GetMapping("/ultima/{usuarioId}")
+	@GetMapping("/usuario/{usuarioId}/ultima")
 	public ResponseEntity<IncidenciaDTO> obtenerUltimaPorUsuario(@PathVariable Long usuarioId) {
 		return ResponseEntity.ok(incidenciaService.obtenerUltimaPorUsuario(usuarioId));
 	}
 
 	// VALIDAR O RESPONDER INCIDENCIA (ADMIN / MUNICIPALIDAD)
-	@PutMapping("/{id}/validar")
+	@PutMapping("/validar/{id}")
 	public ResponseEntity<IncidenciaDTO> validar(@PathVariable Long id, @RequestBody IncidenciaValidacionDTO dto,
 			Authentication auth) {
 		Usuario admin = usuarioService.obtenerUsuarioPorUsername(auth.getName());
