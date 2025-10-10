@@ -35,7 +35,7 @@ public class PuntoVerdeController {
 		punto.setLatitud(dto.getLatitud());
 		punto.setLongitud(dto.getLongitud());
 
-		// activo: si no nos envían valor (null) lo creamos como true por defecto
+		// Estado true por defecto
 		punto.setActivo(dto.getActivo() == null ? true : dto.getActivo());
 		punto.setCreadoPor(creador);
 
@@ -105,11 +105,9 @@ public class PuntoVerdeController {
 		long total = puntos.size();
 		long activos = puntos.stream().filter(PuntoVerde::isActivo).count();
 		long inactivos = total - activos;
-
 		double promedioEntregas = puntos.stream().mapToInt(p -> p.getEntregas().size()).average().orElse(0.0);
 
 		PuntoVerde masUsado = puntos.stream().max(Comparator.comparingInt(p -> p.getEntregas().size())).orElse(null);
-
 		PuntoVerde menosUsado = puntos.stream().min(Comparator.comparingInt(p -> p.getEntregas().size())).orElse(null);
 
 		Map<String, Object> estadisticas = new HashMap<>();
