@@ -169,7 +169,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.convertirADTO(actualizado));
     }
 
-    // Cambiar estado activo/inactivo (solo ADMIN)
+    // Cambiar estado activo/inactivo (ADMIN)
     @PutMapping("/{id}/estado/{activo}/admin")
     public ResponseEntity<UsuarioDTO> cambiarEstado(
             @PathVariable Long id,

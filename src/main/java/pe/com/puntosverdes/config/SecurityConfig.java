@@ -32,7 +32,6 @@ public class SecurityConfig {
 	@Autowired
 	private UserDetailsServiceImpl userDetailsService;
 
-	// Beans de autenticación
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -51,126 +50,91 @@ public class SecurityConfig {
 		return config.getAuthenticationManager();
 	}
 
-	// Configuración principal de seguridad
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable()).authorizeHttpRequests(auth -> auth
 
 				// AUTENTIFICACIÓN (JWT)
-				.requestMatchers("/auth/**").permitAll()		
-				
-				// ENTIDAD USUARIO (PERMISOS)
-				.requestMatchers(HttpMethod.POST, "/api/usuarios/registrar").permitAll()
-				
-				.requestMatchers(
-				    HttpMethod.GET, 
-				    "/api/usuarios/listar", 
-				    "/api/usuarios/listar/estado/**",
-				    "/api/usuarios/listar/rol/**",
-				    "/api/usuarios/buscar/id/**",
-				    "/api/usuarios/buscar/username/**",
-				    "/api/usuarios/buscar/email/**",
-				    "/api/usuarios/buscar/celular/**",
-				    "/api/usuarios/estadisticas",
-				    "/api/usuarios/ranking"
-				).hasAnyRole("ADMIN", "MUNICIPALIDAD")
-				
-				.requestMatchers(
-				    HttpMethod.PUT,
-				    "/api/usuarios/**/cambiar-contrasena/admin",
-				    "/api/usuarios/**/estado/**/admin",
-				    "/api/usuarios/**/asignar-rol/admin",
-				    "/api/usuarios/**/ajustar-puntos/admin",
-				    "/api/usuarios/**/actualizar/admin"
-				).hasRole("ADMIN")
+				.requestMatchers("/auth/**").permitAll()
 
-				.requestMatchers(HttpMethod.DELETE, "/api/usuarios/eliminar/**").hasRole("ADMIN")
-				
+				// ENTIDAD USUARIO
+				.requestMatchers(HttpMethod.POST, "/api/usuarios/registrar").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/listar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/listar/estado/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/listar/rol/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/buscar/id/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/buscar/username/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/buscar/email/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/buscar/celular/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/estadisticas").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/ranking").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/cambiar-contrasena/admin").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/estado/*/admin").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/asignar-rol/admin").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/ajustar-puntos/admin").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/actualizar/admin").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/api/usuarios/eliminar/*").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.GET, "/api/usuarios/perfil/mi").authenticated()
-				.requestMatchers(HttpMethod.PUT, "/api/usuarios/actualizar/**").authenticated()
-				.requestMatchers(HttpMethod.POST, "/api/usuarios/**/perfil").authenticated()
-				.requestMatchers("/api/usuarios/**").authenticated()
-				
-				// ENTIDAD ENTREGA (PERMISOS)
+				.requestMatchers(HttpMethod.PUT, "/api/usuarios/actualizar/*").authenticated()
+				.requestMatchers(HttpMethod.POST, "/api/usuarios/*/perfil").authenticated()
+				.requestMatchers("/api/usuarios/*").authenticated()
+
+				// ENTIDAD ENTREGA
 				.requestMatchers(HttpMethod.POST, "/api/entregas/registrar").hasAnyRole("CIUDADANO", "RECOLECTOR")
 				.requestMatchers(HttpMethod.POST, "/api/entregas/*/archivos").hasAnyRole("CIUDADANO", "RECOLECTOR")
+				.requestMatchers(HttpMethod.GET, "/api/entregas/listar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/entregas/listar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/entregas/detalle/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/entregas/usuario/*/ultima").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/entregas/archivos/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/entregas/validar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.DELETE, "/api/entregas/eliminar/*").hasRole("ADMIN")
 
-				.requestMatchers(HttpMethod.GET, 
-				    "/api/entregas/listar", 
-				    "/api/entregas/listar/**", 
-				    "/api/entregas/detalle/**", 
-				    "/api/entregas/usuario/**/ultima", 
-				    "/api/entregas/archivos/**"
-				).hasAnyRole("ADMIN", "MUNICIPALIDAD")
-
-				.requestMatchers(HttpMethod.PUT, "/api/entregas/validar/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-				.requestMatchers(HttpMethod.DELETE, "/api/entregas/eliminar/**").hasRole("ADMIN")
-				
-				// ENTIDAD CAMPANIAS (PERMISOS)
+				// ENTIDAD CAMPANIAS
 				.requestMatchers(HttpMethod.POST, "/api/campanias/registrar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/campanias/listar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/campanias/listar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/campanias/buscar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/campanias/detalle/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/campanias/estadisticas").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/campanias/actualizar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.DELETE, "/api/campanias/eliminar/*").hasRole("ADMIN")
 
-				.requestMatchers(HttpMethod.GET, 
-				    "/api/campanias/listar", 
-				    "/api/campanias/listar/**",
-				    "/api/campanias/buscar/**",
-				    "/api/campanias/detalle/**",
-				    "/api/campanias/estadisticas"
-				).hasAnyRole("ADMIN", "MUNICIPALIDAD")
-
-				.requestMatchers(HttpMethod.PUT, "/api/campanias/actualizar/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-				.requestMatchers(HttpMethod.DELETE, "/api/campanias/eliminar/**").hasRole("ADMIN")
-				
-				// ENTIDAD PUNTOVERDE (PERMISOS)
+				// ENTIDAD PUNTOVERDE
 				.requestMatchers(HttpMethod.POST, "/api/puntos-verdes/registrar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-				.requestMatchers(HttpMethod.PUT, "/api/puntos-verdes/actualizar/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/puntos-verdes/actualizar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/listar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/listar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/buscar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/detalle/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/puntos-verdes/estadisticas").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.DELETE, "/api/puntos-verdes/eliminar/*").hasRole("ADMIN")
 
-				.requestMatchers(HttpMethod.GET, 
-				    "/api/puntos-verdes/listar",
-				    "/api/puntos-verdes/listar/**",
-				    "/api/puntos-verdes/buscar/**",
-				    "/api/puntos-verdes/detalle/**",
-				    "/api/puntos-verdes/estadisticas"
-				).hasAnyRole("ADMIN", "MUNICIPALIDAD")
-
-				.requestMatchers(HttpMethod.DELETE, "/api/puntos-verdes/eliminar/**").hasRole("ADMIN")
-
-				// ENTIDAD RECOMPENSA (PERMISOS)
+				// ENTIDAD RECOMPENSA
 				.requestMatchers(HttpMethod.POST, "/api/recompensas/registrar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-				.requestMatchers(HttpMethod.PUT, "/api/recompensas/actualizar/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/recompensas/actualizar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/recompensas/listar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/recompensas/listar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/recompensas/buscar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/recompensas/estadisticas").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.DELETE, "/api/recompensas/eliminar/*").hasRole("ADMIN")
 
-				.requestMatchers(HttpMethod.GET,
-				    "/api/recompensas/listar",
-				    "/api/recompensas/listar/**",
-				    "/api/recompensas/buscar/**",
-				    "/api/recompensas/estadisticas"
-				).hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				// ENTIDAD CANJE
+				.requestMatchers(HttpMethod.POST, "/api/canjes/realizar/*").hasAnyRole("RECOLECTOR", "CIUDADANO")
+				.requestMatchers(HttpMethod.GET, "/api/canjes/listar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/canjes/listar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.DELETE, "/api/canjes/eliminar/*").hasRole("ADMIN")
 
-				.requestMatchers(HttpMethod.DELETE, "/api/recompensas/eliminar/**").hasRole("ADMIN")
-				
-				// ENTIDAD CANJE (PERMISOS)
-				.requestMatchers(HttpMethod.POST, "/api/canjes/realizar/**").hasAnyRole("RECOLECTOR", "CIUDADANO")
-
-				.requestMatchers(HttpMethod.GET,
-				    "/api/canjes/listar",
-				    "/api/canjes/listar/**"
-				).hasAnyRole("ADMIN", "MUNICIPALIDAD")
-
-				.requestMatchers(HttpMethod.DELETE, "/api/canjes/eliminar/**").hasRole("ADMIN")
-
-				// ENTIDAD INCIDENCIA (PERMISOS)
+				// ENTIDAD INCIDENCIA
 				.requestMatchers(HttpMethod.POST, "/api/incidencias/registrar").hasRole("RECOLECTOR")
-
-				.requestMatchers(HttpMethod.GET,
-				    "/api/incidencias/listar",
-				    "/api/incidencias/listar/**",
-				    "/api/incidencias/detalle/**",
-				    "/api/incidencias/usuario/**",
-				    "/api/incidencias/archivos/**"
-				).hasAnyRole("ADMIN", "MUNICIPALIDAD")
-
-				.requestMatchers(HttpMethod.PUT, "/api/incidencias/validar/**").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/incidencias/listar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/incidencias/listar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/incidencias/detalle/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/incidencias/usuario/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/incidencias/archivos/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.PUT, "/api/incidencias/validar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.POST, "/api/incidencias/*/archivos").hasRole("RECOLECTOR")
-				.requestMatchers(HttpMethod.DELETE, "/api/incidencias/eliminar/**").hasRole("ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/api/incidencias/eliminar/*").hasRole("ADMIN")
 
 				// CUALQUIER OTRA
 				.anyRequest().authenticated()).exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
