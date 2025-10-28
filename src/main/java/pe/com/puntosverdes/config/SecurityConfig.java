@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -52,10 +53,10 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable()).authorizeHttpRequests(auth -> auth
+		http.csrf(csrf -> csrf.disable()).cors(withDefaults()).authorizeHttpRequests(auth -> auth
 
 				// AUTENTIFICACIÓN (JWT)
-				.requestMatchers("/auth/**").permitAll()
+				.requestMatchers("/api/auth/**").permitAll()
 
 				// ENTIDAD USUARIO
 				.requestMatchers(HttpMethod.POST, "/api/usuarios/registrar").permitAll()
@@ -67,7 +68,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/usuarios/buscar/email/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/usuarios/buscar/celular/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/usuarios/estadisticas").hasAnyRole("ADMIN", "MUNICIPALIDAD")
-				.requestMatchers(HttpMethod.GET, "/api/usuarios/ranking").hasAnyRole("ADMIN", "MUNICIPALIDAD")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/ranking").hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR", "CIUDADANO")
 				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/cambiar-contrasena/admin").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/estado/*/admin").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/asignar-rol/admin").hasRole("ADMIN")

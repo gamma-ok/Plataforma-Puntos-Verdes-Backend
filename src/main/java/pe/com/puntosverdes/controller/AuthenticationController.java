@@ -16,7 +16,7 @@ import pe.com.puntosverdes.service.impl.UserDetailsServiceImpl;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @CrossOrigin("*")
 public class AuthenticationController {
 
@@ -29,7 +29,7 @@ public class AuthenticationController {
 	@Autowired
 	private JwtUtils jwtUtils;
 
-	@PostMapping("/generate-token")
+	@PostMapping("/login")
 	public ResponseEntity<?> generarToken(@RequestBody JwtRequest jwtRequest) throws Exception {
 		try {
 			autenticar(jwtRequest.getUsername(), jwtRequest.getPassword());
