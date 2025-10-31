@@ -57,6 +57,9 @@ public class SecurityConfig {
 
 				// AUTENTIFICACIÓN (JWT)
 				.requestMatchers("/api/auth/**").permitAll()
+				
+				// Permitir acceso publico a las imagenes
+	            .requestMatchers("/uploads/perfiles/**").permitAll()
 
 				// ENTIDAD USUARIO
 				.requestMatchers(HttpMethod.POST, "/api/usuarios/registrar").permitAll()
@@ -69,6 +72,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/usuarios/buscar/celular/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/usuarios/estadisticas").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/usuarios/ranking").hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR", "CIUDADANO")
+				.requestMatchers(HttpMethod.GET, "/api/usuarios/ranking/mi").hasAnyRole("ADMIN", "MUNICIPALIDAD", "RECOLECTOR", "CIUDADANO")
 				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/cambiar-contrasena/admin").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/estado/*/admin").hasRole("ADMIN")
 				.requestMatchers(HttpMethod.PUT, "/api/usuarios/*/asignar-rol/admin").hasRole("ADMIN")
@@ -83,6 +87,7 @@ public class SecurityConfig {
 				// ENTIDAD ENTREGA
 				.requestMatchers(HttpMethod.POST, "/api/entregas/registrar").hasAnyRole("CIUDADANO", "RECOLECTOR")
 				.requestMatchers(HttpMethod.POST, "/api/entregas/*/archivos").hasAnyRole("CIUDADANO", "RECOLECTOR")
+				.requestMatchers(HttpMethod.GET, "/api/entregas/mis-ultimas").hasAnyRole("CIUDADANO", "RECOLECTOR")
 				.requestMatchers(HttpMethod.GET, "/api/entregas/listar").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/entregas/listar/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")
 				.requestMatchers(HttpMethod.GET, "/api/entregas/detalle/*").hasAnyRole("ADMIN", "MUNICIPALIDAD")

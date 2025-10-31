@@ -172,4 +172,10 @@ public class EntregaServiceImpl implements EntregaService {
 				e.getFechaValidacion(), nombreCiudadano, rolCiudadano, validadoPor, rolValidador, puntoVerdeNombre,
 				puntoVerdeDireccion, campaniaTitulo, campaniaUbicacion, e.getEntregaArchivos());
 	}
+	
+	@Override
+	public List<EntregaDTO> obtenerUltimasPorUsuario(Long usuarioId, int limite) {
+	    List<Entrega> entregas = entregaRepository.findTop3ByCiudadanoIdOrderByFechaEntregaDesc(usuarioId);
+	    return entregas.stream().map(this::convertirADTO).collect(Collectors.toList());
+	}
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 public class UsuarioPerfilDTO {
+	private Long id;
 	private String username;
 	private String nombre;
 	private String apellido;
@@ -13,12 +14,14 @@ public class UsuarioPerfilDTO {
 	private Set<String> roles;
 	private int puntosAcumulados;
 	private LocalDateTime fechaRegistro;
+	private boolean enabled;
 
 	public UsuarioPerfilDTO() {
 	}
 
-	public UsuarioPerfilDTO(String username, String nombre, String apellido, String email, String celular,
-			String perfil, Set<String> roles, int puntosAcumulados, LocalDateTime fechaRegistro) {
+	public UsuarioPerfilDTO(Long id, String username, String nombre, String apellido, String email, String celular,
+			String perfil, Set<String> roles, int puntosAcumulados, LocalDateTime fechaRegistro, boolean enabled) {
+		this.id = id;
 		this.username = username;
 		this.nombre = nombre;
 		this.apellido = apellido;
@@ -28,9 +31,18 @@ public class UsuarioPerfilDTO {
 		this.roles = roles;
 		this.puntosAcumulados = puntosAcumulados;
 		this.fechaRegistro = fechaRegistro;
+		this.enabled = enabled;
 	}
 
 	// Getters & Setters
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public String getUsername() {
 		return username;
 	}
@@ -101,5 +113,13 @@ public class UsuarioPerfilDTO {
 
 	public void setFechaRegistro(LocalDateTime fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 }

@@ -18,4 +18,5 @@ public interface EntregaService {
     EntregaDTO obtenerPorId(Long entregaId);
     EntregaDTO obtenerUltimaEntregaPorUsuario(Long usuarioId);
     void eliminarEntrega(Long entregaId);
+    List<EntregaDTO> obtenerUltimasPorUsuario(Long usuarioId, int limite);
 }

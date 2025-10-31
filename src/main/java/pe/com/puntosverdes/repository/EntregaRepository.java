@@ -19,4 +19,5 @@ public interface EntregaRepository extends JpaRepository<Entrega, Long> {
     List<Entrega> findByCampaniaIsNotNullAndEstado(String estado);
     List<Entrega> findByPuntoVerdeIsNotNullAndEstado(String estado);
     Entrega findTopByCiudadanoIdOrderByFechaEntregaDesc(Long ciudadanoId);
+    List<Entrega> findTop3ByCiudadanoIdOrderByFechaEntregaDesc(Long ciudadanoId);
 }

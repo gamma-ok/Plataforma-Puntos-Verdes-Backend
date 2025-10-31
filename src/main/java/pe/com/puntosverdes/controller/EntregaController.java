@@ -187,4 +187,12 @@ public class EntregaController {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
 	    }
 	}
+	
+	// Obtener las últimas 3 entregas del usuario autenticado
+	@GetMapping("/mis-ultimas")
+	public ResponseEntity<List<EntregaDTO>> obtenerMisUltimasEntregas(Authentication authentication) {
+	    Usuario usuario = usuarioService.obtenerUsuarioPorUsername(authentication.getName());
+	    List<EntregaDTO> entregas = entregaService.obtenerUltimasPorUsuario(usuario.getId(), 3);
+	    return ResponseEntity.ok(entregas);
+	}
 }
